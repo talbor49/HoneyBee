@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	PORT = "4590"
-	IP   = "0.0.0.0"
+	PORT       = "8080"
+	IP         = "0.0.0.0"
+	BUFFER_LEN = 1024
 )
 
 func Startserver() {
@@ -25,7 +26,7 @@ func Startserver() {
 	for {
 		conn, err := l.Accept()
 		if err != nil {
-			fmt.Println("Error accepting: ", err.Error())
+			fmt.Println("Error accepting message. ", err.Error())
 			os.Exit(1)
 		}
 		// Handle connections in a new goroutine
@@ -34,34 +35,22 @@ func Startserver() {
 }
 
 func handleConnection(conn net.Conn) {
+	// authenticate and process further requests
 	defer conn.Close()
 
-	buff := make([]byte, 1024)
-	reqLen, err := conn.Read(buff)
-	if err != nil {
-		fmt.Println("Error reading buffer: ", err.Error())
-		return
-	}
+	data := ""
+	buff := make([]byte, BUFFER_LEN)
 
-	authQuery := string(buff[:reqLen])
-	username := HandleAuthentication(authQuery)
-
-	fmt.Println("username: " + username)
-
-	if username == "" {
-		fmt.Println("Invalid credentials.")
-		conn.Write([]byte("Invalid credentials"))
-	} else {
-		fmt.Println("Valid credentials")
-		conn.Write([]byte("Succesfully connected"))
-		data := "undefined"
-		for strings.TrimSpace(data) != "" {
-			reqLen, err = conn.Read(buff)
-			if err != nil {
-				fmt.Println("Error reading buffer: ", err.Error())
-			}
-			data = string(buff[:reqLen-1])
-			HandleQuery(data)
+	for strings.TrimSpace(data) != "quit" {
+		reqLen, err := conn.Read(buff)
+		if err != nil {
+			fmt.Println("Error reading buffer: ", err.Error())
+			return
 		}
+		data = string(buff[:reqLen])
+
+		returnMessage := HandleQuery(data)
+		conn.Write([]byte(returnMessage + "\n"))
 	}
+	fmt.Println("Closed connection")
 }
