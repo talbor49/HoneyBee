@@ -7,6 +7,13 @@ import (
 	"strings"
 )
 
+type DatabaseConnection struct {
+	net.Conn
+	dbname      string
+	connections int
+	username    string
+}
+
 const (
 	PORT       = "8080"
 	IP         = "0.0.0.0"
@@ -30,11 +37,12 @@ func Startserver() {
 			os.Exit(1)
 		}
 		// Handle connections in a new goroutine
-		go handleConnection(conn)
+		dbconn := DatabaseConnection{conn, "", 0, ""}
+		go handleConnection(dbconn)
 	}
 }
 
-func handleConnection(conn net.Conn) {
+func handleConnection(conn DatabaseConnection) {
 	// authenticate and process further requests
 	defer conn.Close()
 
@@ -49,7 +57,7 @@ func handleConnection(conn net.Conn) {
 		}
 		data = string(buff[:reqLen])
 
-		returnMessage := HandleQuery(data)
+		returnMessage := HandleQuery(data, &conn)
 		conn.Write([]byte(returnMessage + "\n"))
 	}
 	fmt.Println("Closed connection")
