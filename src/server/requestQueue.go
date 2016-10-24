@@ -10,16 +10,17 @@ import (
 	"fmt"
 )
 
-// An Item is something we manage in a priority queue.
-type Item struct {
-	value    string // The value of the item; arbitrary.
-	priority int    // The priority of the item in the queue.
+// An Pair is something we manage in a priority queue.
+type Pair struct {
+	requestType string
+	request     interface{}
+	priority    int // The priority of the pair in the queue.
 	// The index is needed by update and is maintained by the heap.Interface methods.
-	index int // The index of the item in the heap.
+	index int // The index of the pair in the heap.
 }
 
-// A PriorityQueue implements heap.Interface and holds Items.
-type PriorityQueue []*Item
+// A PriorityQueue implements heap.Interface and holds Pairs.
+type PriorityQueue []*Pair
 
 func (pq PriorityQueue) Len() int { return len(pq) }
 
@@ -36,62 +37,72 @@ func (pq PriorityQueue) Swap(i, j int) {
 
 func (pq *PriorityQueue) Push(x interface{}) {
 	n := len(*pq)
-	item := x.(*Item)
-	item.index = n
-	*pq = append(*pq, item)
+	pair := x.(*Pair)
+	pair.index = n
+	*pq = append(*pq, pair)
 }
 
 func (pq *PriorityQueue) Pop() interface{} {
 	old := *pq
 	n := len(old)
-	item := old[n-1]
-	item.index = -1 // for safety
+	pair := old[n-1]
+	pair.index = -1 // for safety
 	*pq = old[0 : n-1]
-	return item
+	return pair
 }
 
-// update modifies the priority and value of an Item in the queue.
-func (pq *PriorityQueue) update(item *Item, value string, priority int) {
-	item.value = value
-	item.priority = priority
-	heap.Fix(pq, item.index)
+// update modifies the priority and value of an Pair in the queue.
+func (pq *PriorityQueue) update(pair *Pair, requestType string, request interface{}, priority int) {
+	pair.requestType = requestType
+	pair.request = request
+	pair.priority = priority
+	heap.Fix(pq, pair.index)
 }
 
-// This example creates a PriorityQueue with some items, adds and manipulates an item,
-// and then removes the items in priority order.
+// This example creates a PriorityQueue with some pairs, adds and manipulates an pair,
+// and then removes the pairs in priority order.
 func Example_priorityQueue() {
-	// Some items and their priorities.
-	items := map[string]int{
-		"banana": 3, "apple": 2, "pear": 4,
-	}
+	// Some pairs and their priorities.
 
-	// Create a priority queue, put the items in it, and
+	// Create a priority queue, put the pairs in it, and
 	// establish the priority queue (heap) invariants.
-	pq := make(PriorityQueue, len(items))
-	i := 0
-	for value, priority := range items {
-		pq[i] = &Item{
-			value:    value,
-			priority: priority,
-			index:    i,
-		}
-		i++
-	}
+	pq := make(PriorityQueue, 0)
 	heap.Init(&pq)
 
-	// Insert a new item and then modify its priority.
-	item := &Item{
-		value:    "orange",
-		priority: 1,
-	}
-	heap.Push(&pq, item)
-	pq.update(item, item.value, 5)
+	// Test priority queue
+	// heap.Push(&pq, &Pair{
+	// 	requestType: "GET",
+	// 	priority:    6,
+	// 	index:       0,
+	// })
+	//
+	// heap.Push(&pq, &Pair{
+	// 	requestType: "DELETE",
+	// 	priority:    4,
+	// 	index:       0,
+	// })
+	//
+	// heap.Push(&pq, &Pair{
+	// 	requestType: "SET",
+	// 	priority:    8,
+	// 	index:       0,
+	// })
 
-	// Take the items out; they arrive in decreasing priority order.
+	// Way to insert pairs into queue in a more efficient way.
+	// i := 0
+	// for value, priority := range pairs {
+	// 	pq[i] = &Pair{
+	//
+	// 		value:    value,
+	// 		priority: priority,
+	// 		index:    i,
+	// 	}
+	// 	i++
+	// }
+
+	// Take the pairs out; they arrive in decreasing priority order.
 	for pq.Len() > 0 {
-		item := heap.Pop(&pq).(*Item)
-		fmt.Printf("%.2d:%s ", item.priority, item.value)
+		pair := heap.Pop(&pq).(*Pair)
+		fmt.Printf("%.2d:%s ", pair.priority, pair.requestType)
 	}
-	// Output:
-	// 05:orange 04:pear 03:banana 02:apple
 }
