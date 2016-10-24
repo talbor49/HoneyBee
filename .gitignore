@@ -1,9 +1,2 @@
-bin/
-pkg/
-
-
 # packages that atom go-plus package installs in GOPATH
-src/github.com
-src/golang.org
-src/gopkg.in
-src/vendor
+vendor
