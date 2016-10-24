@@ -3,10 +3,6 @@ package server
 import (
 	"fmt"
 	"grammar"
-	"os"
-	"path"
-	"path/filepath"
-	"strings"
 )
 
 const (
@@ -59,14 +55,15 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 		key := tokens[0]
 		value := tokens[1]
 		fmt.Println("Setting " + key + ":" + value)
-		write_to_hard_disk(key, value, conn.dbname)
-		return SUCCESS
+		setRequest := SetRequest{Key: key, Value: value, Conn: conn}
+		return handleSetRequest(setRequest)
 	case "GET":
 		// GET {key}
 		fmt.Println("Client wants to get key")
 		key := tokens[0]
 		fmt.Println("Returning value of key: " + key)
-		return SUCCESS
+		getRequest := GetRequest{Key: key, Conn: conn}
+		return handleGetRequest(getRequest)
 	case "DELETE":
 		// DELETE {key}
 		fmt.Println("Client wants to set key")
@@ -98,39 +95,4 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 		}
 	*/
 
-}
-
-func credentialsValid(username string, password string) bool {
-	return true
-}
-
-func write_to_hard_disk(key string, value string, database string) {
-	fmt.Println(database + "->" + key + ":" + value)
-
-	dbPath, _ := filepath.Abs(path.Join("data", database+".hb"))
-
-	fmt.Println("dbPath: " + dbPath)
-
-	f, err := os.OpenFile(dbPath, os.O_APPEND|os.O_WRONLY, 0600)
-	if err != nil {
-		panic(err)
-	}
-
-	defer f.Close()
-
-	if _, err = f.WriteString(key + ":" + value + "\n"); err != nil {
-		panic(err)
-	}
-}
-
-func HandleAuthentication(authQuery string) string {
-	// Returns username if authentication is successful, else return empty string
-	// Authentication is:            USERNAME PASSWORD DATABASE
-	fmt.Println("authQuery: " + authQuery)
-	usernameEndIndex := strings.Index(authQuery, " ")
-	if usernameEndIndex != -1 {
-		return authQuery[:strings.Index(authQuery, " ")]
-	} else {
-		return ""
-	}
 }
