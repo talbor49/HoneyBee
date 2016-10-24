@@ -20,7 +20,7 @@ const (
 	BUFFER_LEN = 1024
 )
 
-func Startserver() {
+func StartServer() {
 	l, err := net.Listen("tcp", IP+":"+PORT)
 	if err != nil {
 		fmt.Println("Error listening on port "+PORT, err.Error())

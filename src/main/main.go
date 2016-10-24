@@ -4,5 +4,5 @@ import "server"
 
 func main() {
 	server.InitPriorityQueue()
-	server.Startserver()
+	server.StartServer()
 }
