@@ -3,6 +3,6 @@ package main
 import "server"
 
 func main() {
-	server.Example_priorityQueue()
+	server.InitPriorityQueue()
 	server.Startserver()
 }

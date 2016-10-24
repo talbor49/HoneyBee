@@ -13,9 +13,19 @@ const (
 )
 
 func handleSetRequest(request SetRequest) string {
+	// For now, just blindly push it.
+	// TODO: validate that it doesn't contradict any other action in the queue.
+	// Check many other stuff?
+	// TODO: calculate priority
+	PushRequestToActionQueue(request, "SET", 6)
 	return OK
 }
 func handleGetRequest(request GetRequest) string {
+	// For now, just blindly push it.
+	// TODO: validate that it doesn't contradict any other action in the queue.
+	// Check many other stuff?
+	// TODO: calculate priority
+	PushRequestToActionQueue(request, "GET", 5)
 	return OK
 }
 
