@@ -7,18 +7,18 @@ import (
 	"strings"
 )
 
-type DatabaseConnection struct {
-	net.Conn
-	dbname      string
-	connections int
-	username    string
-}
-
 const (
-	PORT       = "8080"
+	PORT       = "4590"
 	IP         = "0.0.0.0"
 	BUFFER_LEN = 1024
 )
+
+type DatabaseConnection struct {
+	net.Conn
+	Bucket      string
+	Connections int
+	Username    string
+}
 
 func StartServer() {
 	l, err := net.Listen("tcp", IP+":"+PORT)
@@ -30,7 +30,7 @@ func StartServer() {
 	// Close the listener socket when the application closes.
 	defer l.Close()
 
-	go priorityQueueWorker()
+	go PriorityQueueWorker()
 
 	for {
 		conn, err := l.Accept()

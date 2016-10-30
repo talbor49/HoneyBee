@@ -47,7 +47,7 @@ func ParseQuery(query string) (requestType string, parsedTokens []string, err er
 		if validLength {
 			return requestType, tokens, nil
 		} else {
-			return "", nil, errors.New("A valid DELETE request looks like: 'DELETE [BUCKET/KEY] key'")
+			return "", nil, errors.New("A valid DELETE request looks like: 'DELETE [BUCKET/KEY] <name>'")
 		}
 	default:
 		return requestType, tokens, errors.New("Unimplemented request type")

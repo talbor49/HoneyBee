@@ -8,7 +8,9 @@
 
 package server
 
-import "container/heap"
+import (
+	"container/heap"
+)
 
 var queue PriorityQueue = make(PriorityQueue, 0)
 
@@ -26,14 +28,7 @@ func PushRequestToActionQueue(request interface{}, requestType string, priority 
 	})
 }
 
-// An Action is something we manage in a priority queue.
-type Action struct {
-	requestType string
-	request     interface{}
-	priority    int // The priority of the action in the queue.
-	// The index is needed by update and is maintained by the heap.Interface methods.
-	index int // The index of the action in the heap.
-}
+// Action is defined in hexcells
 
 // A PriorityQueue implements heap.Interface and holds Actions.
 type PriorityQueue []*Action

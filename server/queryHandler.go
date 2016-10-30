@@ -3,11 +3,15 @@ package server
 import (
 	"fmt"
 	"grammar"
+	"os"
+	"path"
+	"path/filepath"
 )
 
 const (
-	SUCCESS = "OK"
-	ERROR   = "ERR"
+	SUCCESS               = "OK"
+	ERROR                 = "ERR"
+	ERR_UNAUTHORIZED_USER = "Unauthorized user. please authorize using the AUTH command."
 )
 
 func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
@@ -24,32 +28,58 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 		fmt.Println("Client wants to authenticate.")
 		username := tokens[0]
 		password := tokens[1]
-		dbname := tokens[2]
+		bucketname := tokens[2]
 		if credentialsValid(username, password) {
-			conn.username = username
-			conn.dbname = dbname
+			conn.Username = username
+
+			bucketPath, _ := filepath.Abs(path.Join("data", bucketname+".hb"))
+
+			// If the bucket does not exist - create it.
+			if _, err := os.Stat(bucketPath); os.IsNotExist(err) {
+				// Bucket does not exist
+				f, err := os.Create(bucketPath)
+				if err != nil {
+					panic(err)
+				}
+				f.Close()
+			}
+
+			conn.Bucket = bucketname
 		}
-		fmt.Println("User logged in as: ", username, password, " to database: "+dbname)
+		fmt.Println("User logged in as: ", username, password, " to database: "+bucketname)
 		return SUCCESS
 	case "SET":
 		// SET {key} {value} [ttl] [nooverride]
 		fmt.Println("Client wants to set key")
-		key := tokens[0]
-		value := tokens[1]
-		fmt.Println("Setting " + key + ":" + value)
-		setRequest := SetRequest{Key: key, Value: value, Conn: conn}
-		return handleSetRequest(setRequest)
+		if conn.Bucket != "" {
+			key := tokens[0]
+			value := tokens[1]
+			fmt.Println("Setting " + key + ":" + value)
+			setRequest := SetRequest{Key: key, Value: value, Conn: conn}
+			return handleSetRequest(setRequest)
+		} else {
+			return ERR_UNAUTHORIZED_USER
+		}
+
 	case "GET":
 		// GET {key}
 		fmt.Println("Client wants to get key")
-		key := tokens[0]
-		fmt.Println("Returning value of key: " + key)
-		getRequest := GetRequest{Key: key, Conn: conn}
-		return handleGetRequest(getRequest)
+		if conn.Bucket != "" {
+			key := tokens[0]
+			fmt.Println("Returning value of key: " + key)
+			getRequest := GetRequest{Key: key, Conn: conn}
+			return handleGetRequest(getRequest)
+		} else {
+			return ERR_UNAUTHORIZED_USER
+		}
 	case "DELETE":
 		// DELETE {key}
-		fmt.Println("Client wants to set key")
-		return SUCCESS
+		fmt.Println("Client wants to delete a bucket/key")
+		if conn.Bucket != "" {
+			return SUCCESS
+		} else {
+			return ERR_UNAUTHORIZED_USER
+		}
 	default:
 		return ERROR
 	}

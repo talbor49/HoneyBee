@@ -1,2 +1,3 @@
 # packages that atom go-plus package installs in GOPATH
 vendor
+data
