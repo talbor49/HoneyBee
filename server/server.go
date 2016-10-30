@@ -30,6 +30,8 @@ func StartServer() {
 	// Close the listener socket when the application closes.
 	defer l.Close()
 
+	go priorityQueueWorker()
+
 	for {
 		conn, err := l.Accept()
 		if err != nil {
