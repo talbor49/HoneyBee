@@ -1,9 +1,10 @@
 package server
 
 import (
-	"beehive"
 	"fmt"
 	"time"
+
+	"github.com/talbor49/HoneyBee/beehive"
 )
 
 // in the background, clean "cold" (unused) records from RAM

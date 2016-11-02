@@ -2,10 +2,11 @@ package server
 
 import (
 	"fmt"
-	"grammar"
 	"os"
 	"path"
 	"path/filepath"
+
+	"github.com/talbor49/HoneyBee/grammar"
 )
 
 const (
