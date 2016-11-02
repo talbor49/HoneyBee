@@ -5,4 +5,4 @@ go:
  - tip
 
 script:
- - go test -v tests
+ - go test -v github.com/talbor49/HoneyBee/tests
