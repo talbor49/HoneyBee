@@ -15,6 +15,15 @@ type PriorityQueue []*Action
 
 var Queue PriorityQueue = make(PriorityQueue, 0)
 
+// An Action is something we manage in a priority queue.
+type Action struct {
+	RequestType string
+	Request     interface{}
+	priority    int // The priority of the action in the queue.
+	// The index is needed by update and is maintained by the heap.Interface methods.
+	index int // The index of the action in the heap.
+}
+
 func PushRequestToActionQueue(request interface{}, requestType string, reqPriority int) {
 	heap.Push(&Queue, &Action{
 		Request:     request,
