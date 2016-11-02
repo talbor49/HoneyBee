@@ -8,11 +8,20 @@
 
 package server
 
-import (
-	"container/heap"
-)
+import "container/heap"
 
-var queue PriorityQueue = make(PriorityQueue, 0)
+// A PriorityQueue implements heap.Interface and holds Actions.
+type PriorityQueue []*Action
+
+var Queue PriorityQueue = make(PriorityQueue, 0)
+
+func PushRequestToActionQueue(request interface{}, requestType string, reqPriority int) {
+	heap.Push(&Queue, &Action{
+		Request:     request,
+		priority:    reqPriority,
+		RequestType: requestType,
+	})
+}
 
 func InitPriorityQueue() {
 	// Create a priority queue and establish the priority queue (heap) invariants.
@@ -20,22 +29,15 @@ func InitPriorityQueue() {
 	heap.Init(&pq)
 }
 
-func PushRequestToActionQueue(request interface{}, requestType string, priority int) {
-	heap.Push(&queue, &Action{
-		priority:    priority,
-		request:     request,
-		requestType: requestType,
-	})
+func PopFromRequestQueue() *Action {
+	if Queue.Len() != 0 {
+		return heap.Pop(&Queue).(*Action)
+	} else {
+		return nil
+	}
 }
 
-// Action is defined in hexcells
-
-// A PriorityQueue implements heap.Interface and holds Actions.
-type PriorityQueue []*Action
-
 func (pq PriorityQueue) Len() int { return len(pq) }
-
-func (pq PriorityQueue) Empty() bool { return len(pq) == 0 }
 
 func (pq PriorityQueue) Less(i, j int) bool {
 	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
@@ -50,24 +52,24 @@ func (pq PriorityQueue) Swap(i, j int) {
 
 func (pq *PriorityQueue) Push(x interface{}) {
 	n := len(*pq)
-	action := x.(*Action)
-	action.index = n
-	*pq = append(*pq, action)
+	item := x.(*Action)
+	item.index = n
+	*pq = append(*pq, item)
 }
 
 func (pq *PriorityQueue) Pop() interface{} {
 	old := *pq
 	n := len(old)
-	action := old[n-1]
-	action.index = -1 // for safety
+	item := old[n-1]
+	item.index = -1 // for safety
 	*pq = old[0 : n-1]
-	return action
+	return item
 }
 
 // update modifies the priority and value of an Action in the queue.
-func (pq *PriorityQueue) update(action *Action, requestType string, request interface{}, priority int) {
-	action.requestType = requestType
-	action.request = request
+func (pq *PriorityQueue) Update(action *Action, requestType string, request interface{}, priority int) {
+	action.RequestType = requestType
+	action.Request = request
 	action.priority = priority
 	heap.Fix(pq, action.index)
 }
