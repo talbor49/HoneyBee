@@ -67,6 +67,20 @@ func TestParseAuthRequest(t *testing.T) {
 	}
 }
 
+func TestParseDeleteRequest(t *testing.T) {
+	requestType, parsedTokens, err := grammar.ParseQuery("DELETE KEY foo")
+
+	if err != nil {
+		t.Error("Error parsing legit query")
+	}
+	if requestType != "DELETE" {
+		t.Error("Query parsing did not recognize the right request type")
+	}
+	if len(parsedTokens) != 2 || parsedTokens[0] != "KEY" || parsedTokens[1] != "foo" {
+		t.Error("Tokens parsed wrongly")
+	}
+}
+
 func TestEmptyRequest(t *testing.T) {
 	requestType, _, err := grammar.ParseQuery("")
 	if err == nil || requestType != "" {
