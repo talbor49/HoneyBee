@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"grammar"
+	"github.com/talbor49/HoneyBee/grammar"
 	"testing"
 )
 

@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"server"
+	"github.com/talbor49/HoneyBee/server"
 	"testing"
 )
 
