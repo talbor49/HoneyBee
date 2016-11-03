@@ -13,7 +13,8 @@ import "container/heap"
 // A PriorityQueue implements heap.Interface and holds Actions.
 type PriorityQueue []*Action
 
-var Queue PriorityQueue = make(PriorityQueue, 0)
+//Queue is a priority queue of actions - automatically popped by PriorityQueueWorker
+var Queue = make(PriorityQueue, 0)
 
 // An Action is something we manage in a priority queue.
 type Action struct {
@@ -24,6 +25,7 @@ type Action struct {
 	index int // The index of the action in the heap.
 }
 
+// PushRequestToActionQueue pushes a database request to the actions priority queue.
 func PushRequestToActionQueue(request interface{}, requestType string, reqPriority int) {
 	heap.Push(&Queue, &Action{
 		Request:     request,
@@ -32,18 +34,19 @@ func PushRequestToActionQueue(request interface{}, requestType string, reqPriori
 	})
 }
 
+// InitPriorityQueue initializes the priority queue - creates the slice and inits the heap.
 func InitPriorityQueue() {
 	// Create a priority queue and establish the priority queue (heap) invariants.
 	pq := make(PriorityQueue, 0)
 	heap.Init(&pq)
 }
 
+// PopFromRequestQueue pops the first options from the queue, it it exists.
 func PopFromRequestQueue() *Action {
 	if Queue.Len() != 0 {
 		return heap.Pop(&Queue).(*Action)
-	} else {
-		return nil
 	}
+	return nil
 }
 
 func (pq PriorityQueue) Len() int { return len(pq) }
@@ -75,7 +78,7 @@ func (pq *PriorityQueue) Pop() interface{} {
 	return item
 }
 
-// update modifies the priority and value of an Action in the queue.
+// Update modifies the priority, request and requestType of an Action in the queue.
 func (pq *PriorityQueue) Update(action *Action, requestType string, request interface{}, priority int) {
 	action.RequestType = requestType
 	action.Request = request

@@ -1,8 +1,9 @@
 package tests
 
 import (
-	"github.com/talbor49/HoneyBee/grammar"
 	"testing"
+
+	"github.com/talbor49/HoneyBee/grammar"
 )
 
 func TestParseGetRequest(t *testing.T) {

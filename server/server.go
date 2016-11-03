@@ -8,11 +8,12 @@ import (
 )
 
 const (
-	PORT       = "4590"
-	IP         = "0.0.0.0"
-	BUFFER_LEN = 1024
+	port      = "4590"
+	ip        = "0.0.0.0"
+	bufferLen = 1024
 )
 
+//DatabaseConnection is an extension of the net.Conn struct, added additional required properties.
 type DatabaseConnection struct {
 	net.Conn
 	Bucket      string
@@ -20,13 +21,14 @@ type DatabaseConnection struct {
 	Username    string
 }
 
+// StartServer starts the database server - listens at a specific port for any incoming TCP connections.
 func StartServer() {
-	l, err := net.Listen("tcp", IP+":"+PORT)
+	l, err := net.Listen("tcp", ip+":"+port)
 	if err != nil {
-		fmt.Println("Error listening on port "+PORT, err.Error())
+		fmt.Println("Error listening on port "+port, err.Error())
 		os.Exit(1)
 	}
-	fmt.Println("Listening on: " + IP + ":" + PORT)
+	fmt.Println("Listening on: " + port + ":" + port)
 	// Close the listener socket when the application closes.
 	defer l.Close()
 
@@ -49,7 +51,7 @@ func handleConnection(conn DatabaseConnection) {
 	defer conn.Close()
 
 	data := ""
-	buff := make([]byte, BUFFER_LEN)
+	buff := make([]byte, bufferLen)
 
 	for strings.TrimSpace(data) != "quit" {
 		reqLen, err := conn.Read(buff)

@@ -13,6 +13,8 @@ import (
 
 // current decision - don't compress keys, only compress values
 
+//PriorityQueueWorker will automatically pop actions from the action priority queue.
+//This method will always run as a goroutine.
 func PriorityQueueWorker() {
 	// fmt.Println("Entered queue worker")
 	// defer fmt.Println("Quit queue worker")
@@ -21,7 +23,7 @@ func PriorityQueueWorker() {
 			// fmt.Println("queue is empty :(")
 			time.Sleep(1 * time.Millisecond)
 		} else {
-			var action *Action = Queue.Pop().(*Action)
+			var action *Action = PopFromRequestQueue()
 			reqType := action.RequestType
 			switch reqType {
 			case "GET":

@@ -10,11 +10,14 @@ import (
 )
 
 const (
-	SUCCESS               = "OK"
-	ERROR                 = "ERR"
-	ERR_UNAUTHORIZED_USER = "Unauthorized user. please authorize using the AUTH command."
+	success              = "OK"
+	error                = "ERR"
+	errUnauthorizedError = "Unauthorized user. please authorize using the AUTH command."
 )
 
+// HandleQuery recieves a plain text string query, and hanles it.
+// In most cases it adds it to the requests queue.
+// Whilst in AUTH requests it validates the credentials and returns an answer.
 func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 	// TODO: write query in plain text to log
 	requestType, tokens, err := grammar.ParseQuery(query)
@@ -48,7 +51,7 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 			conn.Bucket = bucketname
 		}
 		fmt.Println("User logged in as: ", username, password, " to database: "+bucketname)
-		return SUCCESS
+		return success
 	case "SET":
 		// SET {key} {value} [ttl] [nooverride]
 		fmt.Println("Client wants to set key")
@@ -58,9 +61,8 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 			fmt.Println("Setting " + key + ":" + value)
 			setRequest := SetRequest{Key: key, Value: value, Conn: conn}
 			return handleSetRequest(setRequest)
-		} else {
-			return ERR_UNAUTHORIZED_USER
 		}
+		return errUnauthorizedError
 
 	case "GET":
 		// GET {key}
@@ -70,19 +72,18 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 			fmt.Println("Returning value of key: " + key)
 			getRequest := GetRequest{Key: key, Conn: conn}
 			return handleGetRequest(getRequest)
-		} else {
-			return ERR_UNAUTHORIZED_USER
 		}
+		return errUnauthorizedError
+
 	case "DELETE":
 		// DELETE {key}
 		fmt.Println("Client wants to delete a bucket/key")
 		if conn.Bucket != "" {
-			return SUCCESS
-		} else {
-			return ERR_UNAUTHORIZED_USER
+			return success
 		}
+		return errUnauthorizedError
 	default:
-		return ERROR
+		return error
 	}
 
 }
