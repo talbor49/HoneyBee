@@ -13,5 +13,5 @@ DB concepts / things to notice while building:
 
 TODO:
 1. Properly test.
-1. Properly documentate.
-1. Properly log.
+2. Properly documentate.
+3. Properly log.
