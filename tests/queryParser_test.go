@@ -62,7 +62,7 @@ func TestParseAuthRequest(t *testing.T) {
 		t.Error("Tokens parsed wrongly")
 	}
 
-	requestType, parsedTokens, err = grammar.ParseQuery("AUTH ASMDQWE2309123 123====SAC A-S---- ;LQAWE,ZWD;LAZOW,E1PO;243KE0P2O1-3EOI90135I1123   12333333333123123\"\" --- ;")
+	_, _, err = grammar.ParseQuery("AUTH ASMDQWE2309123 123====SAC A-S---- ;LQAWE,ZWD;LAZOW,E1PO;243KE0P2O1-3EOI90135I1123   12333333333123123\"\" --- ;")
 	if err == nil {
 		t.Error("Succeed in parsing an invalid query")
 	}
