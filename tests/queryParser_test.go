@@ -50,7 +50,7 @@ func TestParseSetRequest(t *testing.T) {
 }
 
 func TestParseAuthRequest(t *testing.T) {
-	requestType, parsedTokens, err := grammar.ParseQuery("AUTH username password bucket")
+	requestType, parsedTokens, err := grammar.ParseQuery("AUTH username password")
 
 	if err != nil {
 		t.Error("Error parsing legit query")
@@ -58,7 +58,7 @@ func TestParseAuthRequest(t *testing.T) {
 	if requestType != "AUTH" {
 		t.Error("Query parsing did not recognize the right request type")
 	}
-	if len(parsedTokens) != 3 || parsedTokens[0] != "username" || parsedTokens[1] != "password" || parsedTokens[2] != "bucket" {
+	if len(parsedTokens) != 2 || parsedTokens[0] != "username" || parsedTokens[1] != "password" {
 		t.Error("Tokens parsed wrongly")
 	}
 
