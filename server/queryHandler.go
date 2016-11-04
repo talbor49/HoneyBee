@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	success              = "OK"
-	error                = "ERR"
-	errUnauthorizedError = "Unauthorized user. please authorize using the AUTH command."
+	success     = "OK"
+	error       = "ERR"
+	errNoBucket = "You are not connected to any bucket. use the 'SET {BUCKET}'"
 )
 
 // HandleQuery recieves a plain text string query, and hanles it.
@@ -32,25 +32,11 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 		fmt.Println("Client wants to authenticate.")
 		username := tokens[0]
 		password := tokens[1]
-		bucketname := tokens[2]
+		// bucketname := tokens[2]
 		if credentialsValid(username, password) {
 			conn.Username = username
-
-			bucketPath, _ := filepath.Abs(path.Join("data", bucketname+".hb"))
-
-			// If the bucket does not exist - create it.
-			if _, err := os.Stat(bucketPath); os.IsNotExist(err) {
-				// Bucket does not exist
-				f, err := os.Create(bucketPath)
-				if err != nil {
-					panic(err)
-				}
-				f.Close()
-			}
-
-			conn.Bucket = bucketname
 		}
-		fmt.Println("User logged in as: ", username, password, " to database: "+bucketname)
+		fmt.Println("User logged in as: ", username)
 		return success
 	case "SET":
 		// SET {key} {value} [ttl] [nooverride]
@@ -62,7 +48,7 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 			setRequest := SetRequest{Key: key, Value: value, Conn: conn}
 			return handleSetRequest(setRequest)
 		}
-		return errUnauthorizedError
+		return errNoBucket
 
 	case "GET":
 		// GET {key}
@@ -73,7 +59,7 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 			getRequest := GetRequest{Key: key, Conn: conn}
 			return handleGetRequest(getRequest)
 		}
-		return errUnauthorizedError
+		return errNoBucket
 
 	case "DELETE":
 		// DELETE {key}
@@ -81,7 +67,27 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 		if conn.Bucket != "" {
 			return success
 		}
-		return errUnauthorizedError
+		return errNoBucket
+	case "CREATE":
+		fmt.Println("Client wants to create a bucket")
+		return success
+	case "USE":
+		fmt.Println("Client wants to use a specific bucket")
+		bucketname := tokens[0]
+		bucketPath, _ := filepath.Abs(path.Join("data", bucketname+".hb"))
+
+		fmt.Println("Checking if there is a database at path: " + bucketPath)
+		// If the bucket does not exist - create it.
+		if _, err := os.Stat(bucketPath); os.IsNotExist(err) {
+			// Bucket does not exist
+			f, err := os.Create(bucketPath)
+			if err != nil {
+				panic(err)
+			}
+			f.Close()
+		}
+		conn.Bucket = bucketname
+		return success
 	default:
 		return error
 	}

@@ -36,13 +36,13 @@ func ParseQuery(query string) (requestType string, parsedTokens []string, err er
 		}
 	case "AUTH":
 		// form: "AUTH username password bucket"
-		validLength := len(tokens) == 3
+		validLength := len(tokens) == 2
 		if validLength {
 			return requestType, tokens, nil
 		} else {
 			fmt.Println("Tokens recieved: ")
 			fmt.Print(tokens)
-			return "", nil, errors.New("AUTH request should look like 'AUTH username password bucket'")
+			return "", nil, errors.New("AUTH request should look like 'AUTH username password'")
 		}
 	case "DELETE":
 		// form: "DELETE [BUCKET/KEY] key"
@@ -51,6 +51,13 @@ func ParseQuery(query string) (requestType string, parsedTokens []string, err er
 			return requestType, tokens, nil
 		} else {
 			return "", nil, errors.New("A valid DELETE request looks like: 'DELETE [BUCKET/KEY] <name>'")
+		}
+	case "USE":
+		validLength := len(tokens) == 1
+		if validLength {
+			return requestType, tokens, nil
+		} else {
+			return "", nil, errors.New("A valid USE request looks like: 'USE <bucket>'")
 		}
 	default:
 		return "", tokens, errors.New("Unimplemented request type")
