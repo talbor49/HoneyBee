@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/talbor49/HoneyBee/grammar"
@@ -74,7 +73,7 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 	case "USE":
 		fmt.Println("Client wants to use a specific bucket")
 		bucketname := tokens[0]
-		bucketPath, _ := filepath.Abs(path.Join("data", bucketname+".hb"))
+		bucketPath, _ := filepath.Abs(bucketname + ".hb")
 
 		fmt.Println("Checking if there is a database at path: " + bucketPath)
 		// If the bucket does not exist - create it.
