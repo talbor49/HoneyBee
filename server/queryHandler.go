@@ -9,9 +9,10 @@ import (
 )
 
 const (
-	success     = "OK"
-	error       = "ERR"
-	errNoBucket = "You are not connected to any bucket. use the 'SET {BUCKET}'"
+	success        = "OK"
+	error          = "ERR"
+	errNoBucket    = "You are not connected to any bucket. use the 'SET {BUCKET}'"
+	errNotLoggedIn = "You are not logged in. Use 'Auth <username> <password>'"
 )
 
 // HandleQuery recieves a plain text string query, and hanles it.
@@ -40,37 +41,59 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 	case "SET":
 		// SET {key} {value} [ttl] [nooverride]
 		fmt.Println("Client wants to set key")
-		if conn.Bucket != "" {
-			key := tokens[0]
-			value := tokens[1]
-			fmt.Println("Setting " + key + ":" + value)
-			setRequest := SetRequest{Key: key, Value: value, Conn: conn}
-			return handleSetRequest(setRequest)
+		if conn.Bucket == "" {
+			return errNoBucket
 		}
-		return errNoBucket
+		if conn.Username == "" {
+			return errNotLoggedIn
+		}
+		key := tokens[0]
+		value := tokens[1]
+		fmt.Println("Setting " + key + ":" + value)
+		setRequest := SetRequest{Key: key, Value: value, Conn: conn}
+		return handleSetRequest(setRequest)
 
 	case "GET":
 		// GET {key}
 		fmt.Println("Client wants to get key")
-		if conn.Bucket != "" {
-			key := tokens[0]
-			fmt.Println("Returning value of key: " + key)
-			getRequest := GetRequest{Key: key, Conn: conn}
-			return handleGetRequest(getRequest)
+		if conn.Bucket == "" {
+			return errNoBucket
 		}
-		return errNoBucket
+		if conn.Username == "" {
+			return errNotLoggedIn
+		}
+		key := tokens[0]
+		fmt.Println("Returning value of key: " + key)
+		getRequest := GetRequest{Key: key, Conn: conn}
+		return handleGetRequest(getRequest)
 
 	case "DELETE":
 		// DELETE {key}
 		fmt.Println("Client wants to delete a bucket/key")
-		if conn.Bucket != "" {
-			return success
+		if conn.Bucket == "" {
+			return errNoBucket
 		}
-		return errNoBucket
+		if conn.Username == "" {
+			return errNotLoggedIn
+		}
+		return success
 	case "CREATE":
 		fmt.Println("Client wants to create a bucket")
+		if conn.Bucket == "" {
+			return errNoBucket
+		}
+		if conn.Username == "" {
+			return errNotLoggedIn
+		}
 		return success
 	case "USE":
+		if conn.Bucket == "" {
+			return errNoBucket
+		}
+		if conn.Username == "" {
+			return errNotLoggedIn
+		}
+
 		fmt.Println("Client wants to use a specific bucket")
 		bucketname := tokens[0]
 		bucketPath, _ := filepath.Abs(bucketname + ".hb")
