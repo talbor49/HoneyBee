@@ -28,7 +28,7 @@ func StartServer() {
 		fmt.Println("Error listening on port "+port, err.Error())
 		os.Exit(1)
 	}
-	fmt.Println("Listening on: " + port + ":" + port)
+	fmt.Println("Listening on: " + ip + ":" + port)
 	// Close the listener socket when the application closes.
 	defer l.Close()
 
@@ -61,6 +61,7 @@ func handleConnection(conn DatabaseConnection) {
 		}
 		data = string(buff[:reqLen])
 
+		fmt.Println("Request got: " + data)
 		returnMessage := HandleQuery(data, &conn)
 		conn.Write([]byte(returnMessage + "\n"))
 	}

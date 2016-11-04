@@ -2,6 +2,7 @@ package grammar
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -39,6 +40,8 @@ func ParseQuery(query string) (requestType string, parsedTokens []string, err er
 		if validLength {
 			return requestType, tokens, nil
 		} else {
+			fmt.Println("Tokens recieved: ")
+			fmt.Print(tokens)
 			return "", nil, errors.New("AUTH request should look like 'AUTH username password bucket'")
 		}
 	case "DELETE":
