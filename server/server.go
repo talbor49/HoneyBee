@@ -63,7 +63,8 @@ func handleConnection(conn DatabaseConnection) {
 
 		fmt.Println("Request got: " + data)
 		returnMessage := HandleQuery(data, &conn)
-		conn.Write([]byte(returnMessage + "\n"))
+		fmt.Println("Query handles with code " + returnMessage)
+		// conn.Write([]byte(returnMessage + "\n"))
 	}
 	fmt.Println("Closed connection")
 }
