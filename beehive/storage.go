@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 )
@@ -13,7 +12,7 @@ import (
 func WriteToHardDriveBucket(key string, value string, bucketName string) {
 	fmt.Println(bucketName + "->" + key + ":" + value)
 
-	dbPath, _ := filepath.Abs(path.Join("data", bucketName+".hb"))
+	dbPath, _ := filepath.Abs(bucketName + ".hb")
 
 	fmt.Println("dbPath: " + dbPath)
 
@@ -35,7 +34,7 @@ func WriteToHardDriveBucket(key string, value string, bucketName string) {
 }
 
 func ReadFromHardDriveBucket(key string, bucketName string) string {
-	dbPath, _ := filepath.Abs(path.Join("data", bucketName+".hb"))
+	dbPath, _ := filepath.Abs(bucketName + ".hb")
 
 	keyHash := sha1.New()
 	hashedKey := string(keyHash.Sum([]byte(key)))

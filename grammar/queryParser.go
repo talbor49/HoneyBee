@@ -46,7 +46,7 @@ func ParseQuery(query string) (requestType string, parsedTokens []string, err er
 		}
 	case "DELETE":
 		// form: "DELETE [BUCKET/KEY] key"
-		validLength := len(tokens) == 2
+		validLength := len(tokens) >= 2
 		if validLength {
 			return requestType, tokens, nil
 		} else {

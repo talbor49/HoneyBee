@@ -60,10 +60,12 @@ func handleConnection(conn DatabaseConnection) {
 			return
 		}
 		data = string(buff[:reqLen])
+		for _, req := range strings.Split(data, "\n") {
+			fmt.Println("Request got: " + req)
+			returnMessage := HandleQuery(req, &conn)
+			fmt.Println("Query handles with code " + returnMessage)
+		}
 
-		fmt.Println("Request got: " + data)
-		returnMessage := HandleQuery(data, &conn)
-		fmt.Println("Query handles with code " + returnMessage)
 		// conn.Write([]byte(returnMessage + "\n"))
 	}
 	fmt.Println("Closed connection")
