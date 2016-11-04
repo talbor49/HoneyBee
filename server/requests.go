@@ -14,3 +14,10 @@ type SetRequest struct {
 	TTL      int
 	Override bool
 }
+
+//DeleteRequest describes the DELETE request to the database - when the client wants to delete a bucket or a key
+type DeleteRequest struct {
+	Conn       *DatabaseConnection
+	ObjectType string
+	Object     string
+}

@@ -10,10 +10,10 @@ import (
 	"strings"
 )
 
-func Write_to_hard_drive_bucket(key string, value string, database string) {
-	fmt.Println(database + "->" + key + ":" + value)
+func WriteToHardDriveBucket(key string, value string, bucketName string) {
+	fmt.Println(bucketName + "->" + key + ":" + value)
 
-	dbPath, _ := filepath.Abs(path.Join("data", database+".hb"))
+	dbPath, _ := filepath.Abs(path.Join("data", bucketName+".hb"))
 
 	fmt.Println("dbPath: " + dbPath)
 
@@ -34,8 +34,8 @@ func Write_to_hard_drive_bucket(key string, value string, database string) {
 	}
 }
 
-func Read_from_hard_drive_bucket(key string, database string) string {
-	dbPath, _ := filepath.Abs(path.Join("data", database+".hb"))
+func ReadFromHardDriveBucket(key string, bucketName string) string {
+	dbPath, _ := filepath.Abs(path.Join("data", bucketName+".hb"))
 
 	keyHash := sha1.New()
 	hashedKey := string(keyHash.Sum([]byte(key)))
@@ -59,4 +59,8 @@ func Read_from_hard_drive_bucket(key string, database string) string {
 	}
 
 	return ""
+}
+
+func DeleteFromHardDriveBucket(object string, objectType string, bucketName string) error {
+	return nil
 }

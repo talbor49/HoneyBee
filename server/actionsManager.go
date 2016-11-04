@@ -9,8 +9,7 @@ import (
 
 // in the background, clean "cold" (unused) records from RAM
 
-// RULE OF THUMB - UPDATE LOGS WHATEVER YOU DO
-
+// RULE OF THUMB - UPDATE LOGS WHATEVER YOU
 // current decision - don't compress keys, only compress values
 
 //PriorityQueueWorker will automatically pop actions from the action priority queue.
@@ -23,17 +22,23 @@ func PriorityQueueWorker() {
 			// fmt.Println("queue is empty :(")
 			time.Sleep(1 * time.Millisecond)
 		} else {
-			var action *Action = PopFromRequestQueue()
+			var action = PopFromRequestQueue()
 			reqType := action.RequestType
 			switch reqType {
 			case "GET":
 				processGetRequest(action.Request.(GetRequest))
 			case "SET":
 				processSetRequest(action.Request.(SetRequest))
+			case "DELETE":
+				processDeleteRequest(action.Request.(DeleteRequest))
 			}
 			fmt.Println("Popped request type: " + action.RequestType)
 		}
 	}
+}
+
+func processDeleteRequest(req DeleteRequest) {
+	_ = beehive.DeleteFromHardDriveBucket(req.Object, req.ObjectType, req.Conn.Bucket)
 }
 
 func processGetRequest(req GetRequest) {
@@ -47,7 +52,12 @@ func processGetRequest(req GetRequest) {
 			return NOT FOUND
 		}
 	*/
-	val := beehive.Read_from_hard_drive_bucket(req.Key, req.Conn.Bucket)
+	if req.Conn.Bucket == "" {
+		req.Conn.Write([]byte("ERROR client needs to authorize before sending requests"))
+		return
+	}
+
+	val := beehive.ReadFromHardDriveBucket(req.Key, req.Conn.Bucket)
 	req.Conn.Write([]byte(val + "\n"))
 }
 
@@ -63,7 +73,13 @@ func processSetRequest(req SetRequest) {
 			UPDATE CACHED MEMORY
 		}
 	*/
+
+	if req.Conn.Bucket == "" {
+		req.Conn.Write([]byte("ERROR client needs to authorize before sending requests"))
+		return
+	}
+
 	// Write to hard disk
-	beehive.Write_to_hard_drive_bucket(req.Key, req.Value, req.Conn.Bucket)
+	beehive.WriteToHardDriveBucket(req.Key, req.Value, req.Conn.Bucket)
 	req.Conn.Write([]byte(OK + "\n"))
 }
