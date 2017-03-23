@@ -9,10 +9,29 @@ import (
 	"strings"
 )
 
+const (
+	DATA_FOLDER = "data"
+)
+
+func BucketExists(bucketName string) bool {
+	bucketPath, _ := filepath.Abs(filepath.Join(DATA_FOLDER, bucketName+".hb"))
+
+	if _, err := os.Stat(bucketPath); os.IsNotExist(err) {
+		// Bucket does not exist
+		f, err := os.Create(bucketPath)
+		if err != nil {
+			panic(err)
+		}
+		f.Close()
+		return false
+	}
+	return true
+}
+
 func WriteToHardDriveBucket(key string, value string, bucketName string) {
 	fmt.Println(bucketName + "->" + key + ":" + value)
 
-	dbPath, _ := filepath.Abs(bucketName + ".hb")
+	dbPath, _ := filepath.Abs(filepath.Join(DATA_FOLDER, bucketName+".hb"))
 
 	fmt.Println("dbPath: " + dbPath)
 
@@ -34,7 +53,7 @@ func WriteToHardDriveBucket(key string, value string, bucketName string) {
 }
 
 func ReadFromHardDriveBucket(key string, bucketName string) string {
-	dbPath, _ := filepath.Abs(bucketName + ".hb")
+	dbPath, _ := filepath.Abs(filepath.Join(DATA_FOLDER, bucketName+".hb"))
 
 	keyHash := sha1.New()
 	hashedKey := string(keyHash.Sum([]byte(key)))

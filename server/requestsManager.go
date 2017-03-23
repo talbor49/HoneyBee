@@ -26,3 +26,9 @@ func handleGetRequest(request GetRequest) string {
 	PushRequestToActionQueue(request, "GET", 5)
 	return OK
 }
+
+func handleUseRequest(request UseRequest) string {
+
+	PushRequestToActionQueue(request, "USE", 10)
+	return OK
+}
