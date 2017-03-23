@@ -87,14 +87,11 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 		}
 		return success
 	case "USE":
-		if conn.Bucket == "" {
-			return errNoBucket
-		}
+		fmt.Println("Client wants to use a specific bucket")
 		if conn.Username == "" {
 			return errNotLoggedIn
 		}
 
-		fmt.Println("Client wants to use a specific bucket")
 		bucketname := tokens[0]
 		bucketPath, _ := filepath.Abs(bucketname + ".hb")
 
