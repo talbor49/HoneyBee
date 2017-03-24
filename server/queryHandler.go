@@ -9,8 +9,8 @@ import (
 const (
 	success        = "OK"
 	error          = "ERR"
-	errNoBucket    = "You are not connected to any bucket. use the 'SET {BUCKET}'"
-	errNotLoggedIn = "You are not logged in. Use 'Auth <username> <password>'"
+	errNoBucket    = "You are not connected to any bucket. use the 'USE <BUCKET>'"
+	errNotLoggedIn = "You are not logged in. Use 'AUTH <username> <password>'"
 )
 
 // HandleQuery recieves a plain text string query, and hanles it.
