@@ -67,8 +67,12 @@ func ReadFromHardDriveBucket(key string, bucketName string) string {
 
 	pairs := strings.Split(string(data), "\n")
 
-	for _, pair := range pairs {
+	for i := len(pairs) - 1; i >= 0; i-- {
+		pair := pairs[i]
 		colonIndex := strings.Index(pair, ":")
+		if colonIndex <= 0 {
+			continue
+		}
 		pairKey := pair[:colonIndex]
 		if pairKey == hashedKey {
 			pairValue := pair[colonIndex+1:]
