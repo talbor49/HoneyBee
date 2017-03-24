@@ -77,7 +77,7 @@ func processSetRequest(req SetRequest) {
 	*/
 
 	if req.Conn.Bucket == "" {
-		req.Conn.Write([]byte("ERROR client needs to authorize before sending requests"))
+		req.Conn.Write([]byte("ERROR client needs to authorize before sending requests\n"))
 		return
 	}
 
@@ -93,7 +93,7 @@ func processUseRequest(req UseRequest) {
 		req.Conn.Bucket = req.BucketName
 		req.Conn.Write([]byte(OK + "\n"))
 	} else {
-		req.Conn.Write([]byte("ERROR bucket does not exist"))
-		fmt.println("ERROR bucket " + req.BucketName + " does not exist")
+		req.Conn.Write([]byte("ERROR bucket does not exist\n"))
+		fmt.Println("ERROR bucket " + req.BucketName + " does not exist")
 	}
 }
