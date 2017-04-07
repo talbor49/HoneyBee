@@ -7,11 +7,12 @@ import (
 )
 
 const (
-	success               = "OK"
-	error                 = "ERR"
-	errNoBucket           = "You are not connected to any bucket, use 'USE {BUCKET}'."
-	errNotLoggedIn        = "You are not logged in, use 'Auth {username} {password}'."
-	errBucketDoesNotExist = "Bucket does not exist, use 'CREATE {BUCKET}'"
+	success                = "OK"
+	error                  = "ERR"
+	errNoBucket            = "You are not connected to any bucket, use 'USE {BUCKET}'."
+	errNotLoggedIn         = "You are not logged in, use 'Auth {username} {password}'."
+	errBucketDoesNotExist  = "Bucket does not exist, use 'CREATE {BUCKET}'"
+	errBucketAlreadyExists = "Can not create bucket, a bucket with that name already exists"
 )
 
 // HandleQuery recieves a plain text string query, and hanles it.
@@ -79,14 +80,15 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 		return success
 	case "CREATE":
 		fmt.Println("Client wants to create a bucket")
-		if conn.Bucket == "" {
-			return errNoBucket
-		}
 		if conn.Username == "" {
 			return errNotLoggedIn
 		}
 
-		return success
+		bucketName := tokens[0]
+
+		createRequest := CreateRequest{BucketName: bucketName, Conn: conn}
+
+		return handleCreateRequest(createRequest)
 	case "USE":
 		if conn.Username == "" {
 			return errNotLoggedIn

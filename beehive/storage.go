@@ -86,6 +86,16 @@ func ReadFromHardDriveBucket(key string, bucketName string) string {
 	return ""
 }
 
+func CreateHardDriveBucket(bucketName string) string {
+	bucketPath := getBucketPath(bucketName)
+	fmt.Println("Creating bucket: " + bucketName + " on path" + bucketPath)
+	_, err := os.Create(bucketPath)
+	if err != nil {
+		return "Error while creating bucket: " + err.Error()
+	}
+	return "Successfully created bucket" + "\n"
+}
+
 func DeleteFromHardDriveBucket(object string, objectType string, bucketName string) error {
 	return nil
 }

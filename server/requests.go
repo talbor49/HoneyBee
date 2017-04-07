@@ -22,7 +22,14 @@ type DeleteRequest struct {
 	Object     string
 }
 
+//UseRequest is a request that sets the current bucket that is used
 type UseRequest struct {
+	Conn       *DatabaseConnection
+	BucketName string
+}
+
+//CreateRequest creates a database file(bucket) in the db folder
+type CreateRequest struct {
 	Conn       *DatabaseConnection
 	BucketName string
 }

@@ -59,6 +59,13 @@ func ParseQuery(query string) (requestType string, parsedTokens []string, err er
 		} else {
 			return "", nil, errors.New("A valid USE request looks like: 'USE <bucket>'")
 		}
+	case "CREATE":
+		validLength := len(tokens) == 1
+		if validLength {
+			return requestType, tokens, nil
+		} else {
+			return "", nil, errors.New("A valid CREATE request looks like: 'CREATE <bucket>'")
+		}
 	default:
 		return "", tokens, errors.New("Unimplemented request type")
 	}

@@ -32,3 +32,8 @@ func handleUseRequest(request UseRequest) string {
 	PushRequestToActionQueue(request, "USE", 10)
 	return OK
 }
+
+func handleCreateRequest(request CreateRequest) string {
+	PushRequestToActionQueue(request, "CREATE", 10)
+	return OK
+}

@@ -33,6 +33,8 @@ func PriorityQueueWorker() {
 				processDeleteRequest(action.Request.(DeleteRequest))
 			case "USE":
 				processUseRequest(action.Request.(UseRequest))
+			case "CREATE":
+				processCreateRequest(action.Request.(CreateRequest))
 			}
 			fmt.Println("Popped request type: " + action.RequestType)
 		}
@@ -104,4 +106,15 @@ func processUseRequest(req UseRequest) {
 		req.Conn.Write([]byte("ERROR bucket does not exist\n"))
 		fmt.Println("ERROR bucket " + req.BucketName + " does not exist")
 	}
+}
+
+func processCreateRequest(req CreateRequest) {
+	if beehive.BucketExists(req.BucketName) {
+		req.Conn.Write([]byte(errBucketAlreadyExists + "\n"))
+		return
+	}
+
+	result := beehive.CreateHardDriveBucket(req.BucketName)
+	req.Conn.Write([]byte(result))
+	fmt.Println(result)
 }
