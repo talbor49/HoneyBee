@@ -2,6 +2,7 @@ package beehive
 
 import (
 	"crypto/sha1"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -31,7 +32,7 @@ func BucketExists(bucketName string) bool {
 	return true
 }
 
-func WriteToHardDriveBucket(key string, value string, bucketName string) {
+func WriteToHardDriveBucket(key string, value string, bucketName string) (string, error) {
 	fmt.Println(bucketName + "->" + key + ":" + value)
 
 	bucketPath := getBucketPath(bucketName)
@@ -51,11 +52,12 @@ func WriteToHardDriveBucket(key string, value string, bucketName string) {
 	value = strings.Replace(value, "\n", "\\n", -1)
 
 	if _, err = f.WriteString(hashedKey + ":" + value + "\n"); err != nil {
-		panic(err)
+		return "Error while trying to write key to bucket\n", err
 	}
+	return "Succesfully wrote key to bucket\n", nil
 }
 
-func ReadFromHardDriveBucket(key string, bucketName string) string {
+func ReadFromHardDriveBucket(key string, bucketName string) (string, error) {
 	bucketPath := getBucketPath(bucketName)
 
 	keyHash := sha1.New()
@@ -79,23 +81,23 @@ func ReadFromHardDriveBucket(key string, bucketName string) string {
 		pairKey := pair[:colonIndex]
 		if pairKey == hashedKey {
 			pairValue := pair[colonIndex+1:]
-			return pairValue
+			return pairValue, nil
 		}
 	}
 
-	return ""
+	return "", errors.New("Key not found")
 }
 
-func CreateHardDriveBucket(bucketName string) string {
+func CreateHardDriveBucket(bucketName string) (string, error) {
 	bucketPath := getBucketPath(bucketName)
 	fmt.Println("Creating bucket: " + bucketName + " on path" + bucketPath)
 	_, err := os.Create(bucketPath)
 	if err != nil {
-		return "Error while creating bucket: " + err.Error()
+		return "Error while creating bucket\n", err
 	}
-	return "Successfully created bucket" + "\n"
+	return ("Successfully created bucket\n"), err
 }
 
-func DeleteFromHardDriveBucket(object string, objectType string, bucketName string) error {
-	return nil
+func DeleteFromHardDriveBucket(object string, objectType string, bucketName string) (string, error) {
+	return "", nil
 }

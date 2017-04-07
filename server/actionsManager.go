@@ -42,7 +42,8 @@ func PriorityQueueWorker() {
 }
 
 func processDeleteRequest(req DeleteRequest) {
-	_ = beehive.DeleteFromHardDriveBucket(req.Object, req.ObjectType, req.Conn.Bucket)
+	message, _ := beehive.DeleteFromHardDriveBucket(req.Object, req.ObjectType, req.Conn.Bucket)
+	req.Conn.Write([]byte(message))
 }
 
 func processGetRequest(req GetRequest) {
@@ -65,8 +66,8 @@ func processGetRequest(req GetRequest) {
 		return
 	}
 
-	val := beehive.ReadFromHardDriveBucket(req.Key, req.Conn.Bucket)
-	req.Conn.Write([]byte(val + "\n"))
+	message, _ := beehive.ReadFromHardDriveBucket(req.Key, req.Conn.Bucket)
+	req.Conn.Write([]byte(message + "\n"))
 }
 
 func processSetRequest(req SetRequest) {
@@ -92,8 +93,8 @@ func processSetRequest(req SetRequest) {
 	}
 
 	// Write to hard disk
-	beehive.WriteToHardDriveBucket(req.Key, req.Value, req.Conn.Bucket)
-	req.Conn.Write([]byte(OK + "\n"))
+	message, _ := beehive.WriteToHardDriveBucket(req.Key, req.Value, req.Conn.Bucket)
+	req.Conn.Write([]byte(message))
 }
 
 func processUseRequest(req UseRequest) {
@@ -114,7 +115,7 @@ func processCreateRequest(req CreateRequest) {
 		return
 	}
 
-	result := beehive.CreateHardDriveBucket(req.BucketName)
-	req.Conn.Write([]byte(result))
-	fmt.Println(result)
+	message, _ := beehive.CreateHardDriveBucket(req.BucketName)
+	req.Conn.Write([]byte(message))
+	fmt.Println(message)
 }
