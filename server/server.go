@@ -68,11 +68,11 @@ func handleConnection(conn DatabaseConnection) {
 			}
 			fmt.Println("Request got: " + req)
 			returnMessage := HandleQuery(req, &conn)
+			conn.Write([]byte(returnMessage + "\n"))
 			fmt.Println("Query handles with code " + returnMessage)
 			conn.Write([]byte(returnMessage + "\n"))
 		}
 
-		// conn.Write([]byte(returnMessage + "\n"))
 	}
 	fmt.Println("Closed connection")
 }

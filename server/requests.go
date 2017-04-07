@@ -21,3 +21,8 @@ type DeleteRequest struct {
 	ObjectType string
 	Object     string
 }
+
+type UseRequest struct {
+	Conn       *DatabaseConnection
+	BucketName string
+}

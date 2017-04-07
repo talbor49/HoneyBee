@@ -13,6 +13,24 @@ const (
 	DATA_FOLDER = "data"
 )
 
+<<<<<<< HEAD
+=======
+func BucketExists(bucketName string) bool {
+	bucketPath, _ := filepath.Abs(filepath.Join(DATA_FOLDER, bucketName+".hb"))
+
+	if _, err := os.Stat(bucketPath); os.IsNotExist(err) {
+		// Bucket does not exist
+		f, err := os.Create(bucketPath)
+		if err != nil {
+			panic(err)
+		}
+		f.Close()
+		return false
+	}
+	return true
+}
+
+>>>>>>> 84b6353f02a9bd6662913c839e967d330cb40c0d
 func WriteToHardDriveBucket(key string, value string, bucketName string) {
 	fmt.Println(bucketName + "->" + key + ":" + value)
 
@@ -52,9 +70,14 @@ func ReadFromHardDriveBucket(key string, bucketName string) string {
 
 	pairs := strings.Split(string(data), "\n")
 
-	for _, pair := range pairs {
+	for i := len(pairs) - 1; i >= 0; i-- {
+		pair := pairs[i]
 		colonIndex := strings.Index(pair, ":")
+<<<<<<< HEAD
 		if colonIndex == -1 {
+=======
+		if colonIndex <= 0 {
+>>>>>>> 84b6353f02a9bd6662913c839e967d330cb40c0d
 			continue
 		}
 		pairKey := pair[:colonIndex]

@@ -33,6 +33,8 @@ func PriorityQueueWorker() {
 				processSetRequest(action.Request.(SetRequest))
 			case "DELETE":
 				processDeleteRequest(action.Request.(DeleteRequest))
+			case "USE":
+				processUseRequest(action.Request.(UseRequest))
 			}
 			fmt.Println("Popped request type: " + action.RequestType)
 		}
@@ -81,7 +83,7 @@ func processSetRequest(req SetRequest) {
 	*/
 
 	if req.Conn.Bucket == "" {
-		req.Conn.Write([]byte("ERROR client needs to authorize before sending requests"))
+		req.Conn.Write([]byte("ERROR client needs to authorize before sending requests\n"))
 		return
 	}
 	if _, err := os.Stat(filepath.Abs(filepath.Join(beehive.DATA_FOLDER, req.Conn.Bucket+".hb"))); os.IsNotExist(err) {
@@ -92,4 +94,16 @@ func processSetRequest(req SetRequest) {
 	// Write to hard disk
 	beehive.WriteToHardDriveBucket(req.Key, req.Value, req.Conn.Bucket)
 	req.Conn.Write([]byte(OK + "\n"))
+}
+
+func processUseRequest(req UseRequest) {
+	fmt.Println("Checking if there is a database at path: " + req.BucketName)
+	// If the bucket does not exist - create it.
+	if beehive.BucketExists(req.BucketName) {
+		req.Conn.Bucket = req.BucketName
+		req.Conn.Write([]byte(OK + "\n"))
+	} else {
+		req.Conn.Write([]byte("ERROR bucket does not exist\n"))
+		fmt.Println("ERROR bucket " + req.BucketName + " does not exist")
+	}
 }
