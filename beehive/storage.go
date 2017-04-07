@@ -10,35 +10,35 @@ import (
 )
 
 const (
-	DATA_FOLDER = "data"
+	dataFolder = "data"
 )
 
-<<<<<<< HEAD
-=======
+func getBucketPath(bucketName string) string {
+	bucketPath, err := filepath.Abs(filepath.Join(dataFolder, bucketName+".hb"))
+	if err != nil {
+		panic(err)
+	}
+	return bucketPath
+}
+
 func BucketExists(bucketName string) bool {
-	bucketPath, _ := filepath.Abs(filepath.Join(DATA_FOLDER, bucketName+".hb"))
+	bucketPath := getBucketPath(bucketName)
 
 	if _, err := os.Stat(bucketPath); os.IsNotExist(err) {
 		// Bucket does not exist
-		f, err := os.Create(bucketPath)
-		if err != nil {
-			panic(err)
-		}
-		f.Close()
 		return false
 	}
 	return true
 }
 
->>>>>>> 84b6353f02a9bd6662913c839e967d330cb40c0d
 func WriteToHardDriveBucket(key string, value string, bucketName string) {
 	fmt.Println(bucketName + "->" + key + ":" + value)
 
-	dbPath, _ := filepath.Abs(filepath.Join(DATA_FOLDER, bucketName+".hb"))
+	bucketPath := getBucketPath(bucketName)
 
-	fmt.Println("dbPath: " + dbPath)
+	fmt.Println("bucketPath: " + bucketPath)
 
-	f, err := os.OpenFile(dbPath, os.O_APPEND|os.O_WRONLY, 0600)
+	f, err := os.OpenFile(bucketPath, os.O_APPEND|os.O_WRONLY, 0600)
 	if err != nil {
 		panic(err)
 	}
@@ -56,14 +56,14 @@ func WriteToHardDriveBucket(key string, value string, bucketName string) {
 }
 
 func ReadFromHardDriveBucket(key string, bucketName string) string {
-	dbPath, _ := filepath.Abs(filepath.Join(DATA_FOLDER, bucketName+".hb"))
+	bucketPath := getBucketPath(bucketName)
 
 	keyHash := sha1.New()
 	hashedKey := string(keyHash.Sum([]byte(key)))
 
-	fmt.Println("dbPath: " + dbPath)
+	fmt.Println("bucketPath: " + bucketPath)
 
-	data, err := ioutil.ReadFile(dbPath)
+	data, err := ioutil.ReadFile(bucketPath)
 	if err != nil {
 		panic(err)
 	}
@@ -73,11 +73,7 @@ func ReadFromHardDriveBucket(key string, bucketName string) string {
 	for i := len(pairs) - 1; i >= 0; i-- {
 		pair := pairs[i]
 		colonIndex := strings.Index(pair, ":")
-<<<<<<< HEAD
-		if colonIndex == -1 {
-=======
 		if colonIndex <= 0 {
->>>>>>> 84b6353f02a9bd6662913c839e967d330cb40c0d
 			continue
 		}
 		pairKey := pair[:colonIndex]

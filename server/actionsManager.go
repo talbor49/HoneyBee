@@ -2,8 +2,6 @@ package server
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/talbor49/HoneyBee/beehive"
@@ -60,7 +58,7 @@ func processGetRequest(req GetRequest) {
 		req.Conn.Write([]byte("ERROR client needs to authorize before sending requests"))
 		return
 	}
-	if _, err := os.Stat(filepath.Abs(filepath.Join(beehive.DATA_FOLDER, req.Conn.Bucket+".hb"))); os.IsNotExist(err) {
+	if !beehive.BucketExists(req.Conn.Bucket) {
 		req.Conn.Write([]byte(errBucketDoesNotExist))
 		return
 	}
@@ -86,7 +84,7 @@ func processSetRequest(req SetRequest) {
 		req.Conn.Write([]byte("ERROR client needs to authorize before sending requests\n"))
 		return
 	}
-	if _, err := os.Stat(filepath.Abs(filepath.Join(beehive.DATA_FOLDER, req.Conn.Bucket+".hb"))); os.IsNotExist(err) {
+	if !beehive.BucketExists(req.Conn.Bucket) {
 		req.Conn.Write([]byte(errBucketDoesNotExist))
 		return
 	}
