@@ -9,10 +9,11 @@ import (
 )
 
 const (
-	success        = "OK"
-	error          = "ERR"
-	errNoBucket    = "You are not connected to any bucket. use the 'SET {BUCKET}'"
-	errNotLoggedIn = "You are not logged in. Use 'Auth <username> <password>'"
+	success               = "OK"
+	error                 = "ERR"
+	errNoBucket           = "You are not connected to any bucket, use 'USE {BUCKET}'."
+	errNotLoggedIn        = "You are not logged in, use 'Auth {username} {password}'."
+	errBucketDoesNotExist = "Bucket does not exist, use 'CREATE {BUCKET}'"
 )
 
 // HandleQuery recieves a plain text string query, and hanles it.
@@ -47,6 +48,7 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 		if conn.Username == "" {
 			return errNotLoggedIn
 		}
+
 		key := tokens[0]
 		value := tokens[1]
 		fmt.Println("Setting " + key + ":" + value)
@@ -85,11 +87,9 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 		if conn.Username == "" {
 			return errNotLoggedIn
 		}
+
 		return success
 	case "USE":
-		if conn.Bucket == "" {
-			return errNoBucket
-		}
 		if conn.Username == "" {
 			return errNotLoggedIn
 		}

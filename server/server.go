@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strconv"
 	"strings"
 )
 
 const (
-	port      = "4590"
+	port      = "8080"
 	ip        = "0.0.0.0"
 	bufferLen = 1024
 )
@@ -60,10 +61,15 @@ func handleConnection(conn DatabaseConnection) {
 			return
 		}
 		data = string(buff[:reqLen])
+		fmt.Println("reqLen: " + strconv.Itoa(reqLen) + " and data: '" + data + "'")
 		for _, req := range strings.Split(data, "\n") {
+			if len(req) == 0 {
+				continue
+			}
 			fmt.Println("Request got: " + req)
 			returnMessage := HandleQuery(req, &conn)
 			fmt.Println("Query handles with code " + returnMessage)
+			conn.Write([]byte(returnMessage + "\n"))
 		}
 
 		// conn.Write([]byte(returnMessage + "\n"))
