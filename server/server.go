@@ -59,7 +59,7 @@ func handleConnection(conn DatabaseConnection) {
 		reqLen, err := conn.Read(buff)
 		if err != nil {
 			log.Printf("Error reading buffer. %s", err)
-			return
+			continue
 		}
 		data = string(buff[:reqLen])
 		for _, req := range strings.Split(data, "\n") {
