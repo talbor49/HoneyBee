@@ -2,17 +2,17 @@
 The Honey Bee DB behaves like a beehive. A key-value database built in GOLANG.
 
 ## How to run the database using docker:
-Prerequisites:
+### Prerequisites:
 1. Golang
 2. Docker + docker-compose
 
-Running the database using docker (run from the project root folder):
+### Running the database using docker (run from the project root folder):
 ```
 docker-compose up
 ```
 
 ## Testing:
-How to run tests:
+### How to run tests:
 ```bash
 go test github.com/talbor49/HoneyBee/tests
 ```
