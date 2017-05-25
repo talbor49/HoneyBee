@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/talbor49/HoneyBee/beehive"
+	"log"
 )
 
 const (
@@ -16,9 +17,9 @@ const (
 // RULE OF THUMB - UPDATE LOGS WHATEVER YOU
 // current decision - don't compress keys, only compress values
 
-//PriorityQueueWorker will automatically pop actions from the action priority queue.
+//QueueRequestsHandler will automatically pop actions from the action priority queue.
 //This method will always run as a goroutine.
-func PriorityQueueWorker() {
+func QueueRequestsHandler() {
 	// fmt.Println("Entered queue worker")
 	// defer fmt.Println("Quit queue worker")
 	for {
@@ -40,7 +41,7 @@ func PriorityQueueWorker() {
 			case "CREATE":
 				processCreateRequest(action.Request.(CreateRequest))
 			}
-			fmt.Println("Popped request type: " + action.RequestType)
+			log.Printf("Popped request type: %s", action.RequestType)
 		}
 	}
 }
@@ -102,7 +103,7 @@ func processSetRequest(req SetRequest) {
 }
 
 func processUseRequest(req UseRequest) {
-	fmt.Println("Checking if there is a database at path: " + req.BucketName)
+	log.Printf("Checking if there is a database at path: %s", req.BucketName)
 	// If the bucket does not exist - create it.
 	if beehive.BucketExists(req.BucketName) {
 		req.Conn.Bucket = req.BucketName
@@ -110,7 +111,7 @@ func processUseRequest(req UseRequest) {
 	} else {
 		errorMessage := fmt.Sprintf(ERROR_NO_SUCH_BUCKET, req.BucketName)
 		req.Conn.Write([]byte(errorMessage))
-		fmt.Println(errorMessage)
+		log.Println(errorMessage)
 	}
 }
 
@@ -122,5 +123,5 @@ func processCreateRequest(req CreateRequest) {
 
 	message, _ := beehive.CreateHardDriveBucket(req.BucketName)
 	req.Conn.Write([]byte(message))
-	fmt.Println(message)
+	log.Println(message)
 }

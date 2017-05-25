@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"strconv"
 	"strings"
+	"log"
 )
 
 const (
@@ -24,21 +24,22 @@ type DatabaseConnection struct {
 
 // StartServer starts the database server - listens at a specific port for any incoming TCP connections.
 func StartServer() {
-	l, err := net.Listen("tcp", ip+":"+port)
+	addr := fmt.Sprintf("%s:%s", ip, port)
+	listener, err := net.Listen("tcp", addr)
 	if err != nil {
-		fmt.Println("Error listening on port "+port, err.Error())
+		log.Fatal(err)
 		os.Exit(1)
 	}
-	fmt.Println("Listening on: " + ip + ":" + port)
+	log.Printf("Listening on: %s", addr)
 	// Close the listener socket when the application closes.
-	defer l.Close()
+	defer listener.Close()
 
-	go PriorityQueueWorker()
+	go QueueRequestsHandler()
 
 	for {
-		conn, err := l.Accept()
+		conn, err := listener.Accept()
 		if err != nil {
-			fmt.Println("Error accepting message. ", err.Error())
+			log.Fatalf("Error accepting message from client, %s", err)
 			os.Exit(1)
 		}
 		// Handle connections in a new goroutine
@@ -57,19 +58,17 @@ func handleConnection(conn DatabaseConnection) {
 	for strings.TrimSpace(data) != "quit" {
 		reqLen, err := conn.Read(buff)
 		if err != nil {
-			fmt.Println("Error reading buffer: ", err.Error())
+			log.Printf("Error reading buffer. %s", err)
 			return
 		}
 		data = string(buff[:reqLen])
-		fmt.Println("reqLen: " + strconv.Itoa(reqLen) + " and data: '" + data + "'")
 		for _, req := range strings.Split(data, "\n") {
 			if len(req) == 0 {
 				continue
 			}
-			fmt.Println("Request got: " + req)
 			returnMessage := HandleQuery(req, &conn)
 			conn.Write([]byte(returnMessage + "\n"))
-			fmt.Println("Query handles with code " + returnMessage)
+			log.Printf("Query handles with code %s", returnMessage)
 		}
 
 	}

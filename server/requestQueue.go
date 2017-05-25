@@ -13,7 +13,7 @@ import "container/heap"
 // A PriorityQueue implements heap.Interface and holds Actions.
 type PriorityQueue []*Action
 
-//Queue is a priority queue of actions - automatically popped by PriorityQueueWorker
+//Queue is a priority queue of actions - automatically popped by QueueRequestsHandler
 var Queue = make(PriorityQueue, 0)
 
 // An Action is something we manage in a priority queue.

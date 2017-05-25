@@ -5,7 +5,7 @@ const (
 	ERR = "ERR"
 )
 
-func handleSetRequest(request SetRequest) string {
+func pushSetRequestToQ(request SetRequest) string {
 	// For now, just blindly push it.
 	// TODO: validate that it doesn't contradict any other action in the queue.
 	// Check many other stuff?
@@ -18,7 +18,7 @@ func handleSetRequest(request SetRequest) string {
 // 	inconsistentKeys.append(key)  // When someone tries to access one of the keys in this list, push it up the priority queue (at least above the GET request)
 // }
 
-func handleGetRequest(request GetRequest) string {
+func pushGetRequestToQ(request GetRequest) string {
 	// For now, just blindly push it.
 	// TODO: validate that it doesn't contradict any other action in the queue.
 	// Check many other stuff?
@@ -27,13 +27,13 @@ func handleGetRequest(request GetRequest) string {
 	return OK
 }
 
-func handleUseRequest(request UseRequest) string {
+func pushUseRequestToQ(request UseRequest) string {
 
 	PushRequestToActionQueue(request, "USE", 10)
 	return OK
 }
 
-func handleCreateRequest(request CreateRequest) string {
+func pushCreateRequesToQ(request CreateRequest) string {
 	PushRequestToActionQueue(request, "CREATE", 10)
 	return OK
 }

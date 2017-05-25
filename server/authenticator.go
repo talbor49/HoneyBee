@@ -1,8 +1,8 @@
 package server
 
 import (
-	"fmt"
 	"strings"
+	"log"
 )
 
 func credentialsValid(username string, password string) bool {
@@ -13,7 +13,7 @@ func credentialsValid(username string, password string) bool {
 func HandleAuthentication(authQuery string) string {
 	// Returns username if authentication is successful, else return empty string
 	// Authentication is:            USERNAME PASSWORD DATABASE
-	fmt.Println("authQuery: " + authQuery)
+	log.Printf("authQuery: %s", authQuery)
 	usernameEndIndex := strings.Index(authQuery, " ")
 	if usernameEndIndex != -1 {
 		return authQuery[:strings.Index(authQuery, " ")]

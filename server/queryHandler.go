@@ -1,25 +1,25 @@
 package server
 
 import (
-	"fmt"
-
 	"github.com/talbor49/HoneyBee/grammar"
+	"log"
 )
 
 const (
 	success                = "OK"
-	error                  = "ERR"
+	errNoSuchCommand                  = "No such command"
 	errNoBucket            = "You are not connected to any bucket, use 'USE {BUCKET}'."
 	errNotLoggedIn         = "You are not logged in, use 'Auth {username} {password}'."
 	errBucketDoesNotExist  = "Bucket does not exist, use 'CREATE {BUCKET}'"
 	errBucketAlreadyExists = "Can not create bucket, a bucket with that name already exists"
+	illegalRequestTemplate = "Illegal request by client, %s"
 )
 
 // HandleQuery recieves a plain text string query, and hanles it.
 // In most cases it adds it to the requests queue.
 // Whilst in AUTH requests it validates the credentials and returns an answer.
 func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
-	// TODO: write query in plain text to log
+	log.Printf("Handling query: %s", query)
 	requestType, tokens, err := grammar.ParseQuery(query)
 
 	if err != nil {
@@ -29,58 +29,66 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 	switch requestType {
 	case "AUTH":
 		// AUTH {username} {password} {database_name}
-		fmt.Println("Client wants to authenticate.")
+		log.Println("Client wants to authenticate.")
 		username := tokens[0]
 		password := tokens[1]
 		// bucketname := tokens[2]
 		if credentialsValid(username, password) {
 			conn.Username = username
 		}
-		fmt.Println("User logged in as: ", username)
+
+		log.Printf("User logged in as: %s", username)
 		return success
 	case "SET":
 		// SET {key} {value} [ttl] [nooverride]
-		fmt.Println("Client wants to set key")
 		if conn.Bucket == "" {
+			log.Printf(illegalRequestTemplate, errNoBucket)
 			return errNoBucket
 		}
 		if conn.Username == "" {
+			log.Printf(illegalRequestTemplate, errNoBucket)
 			return errNotLoggedIn
 		}
 
 		key := tokens[0]
 		value := tokens[1]
-		fmt.Println("Setting " + key + ":" + value)
+		log.Printf("Setting %s:%s", key, value)
 		setRequest := SetRequest{Key: key, Value: value, Conn: conn}
-		return handleSetRequest(setRequest)
+		return pushSetRequestToQ(setRequest)
 
 	case "GET":
 		// GET {key}
-		fmt.Println("Client wants to get key")
+		log.Println("Client wants to get key")
 		if conn.Bucket == "" {
+			log.Printf(illegalRequestTemplate, errNoBucket)
 			return errNoBucket
 		}
 		if conn.Username == "" {
+			log.Printf(illegalRequestTemplate, errNotLoggedIn)
 			return errNotLoggedIn
 		}
 		key := tokens[0]
-		fmt.Println("Returning value of key: " + key)
+		log.Printf("Client asked for value of key: %s", key)
 		getRequest := GetRequest{Key: key, Conn: conn}
-		return handleGetRequest(getRequest)
+		return pushGetRequestToQ(getRequest)
 
 	case "DELETE":
 		// DELETE {key}
-		fmt.Println("Client wants to delete a bucket/key")
+		log.Println("Client wants to delete a bucket/key")
 		if conn.Bucket == "" {
+			log.Printf(illegalRequestTemplate, errNoBucket)
 			return errNoBucket
 		}
 		if conn.Username == "" {
+			log.Printf(illegalRequestTemplate, errNotLoggedIn)
 			return errNotLoggedIn
 		}
+		// TODO implement
 		return success
 	case "CREATE":
-		fmt.Println("Client wants to create a bucket")
+		log.Println("Client wants to create a bucket")
 		if conn.Username == "" {
+			log.Printf(illegalRequestTemplate, errNotLoggedIn)
 			return errNotLoggedIn
 		}
 
@@ -88,19 +96,20 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 
 		createRequest := CreateRequest{BucketName: bucketName, Conn: conn}
 
-		return handleCreateRequest(createRequest)
+		return pushCreateRequesToQ(createRequest)
 	case "USE":
 		if conn.Username == "" {
+			log.Printf(illegalRequestTemplate, errNotLoggedIn)
 			return errNotLoggedIn
 		}
 
 		bucketname := tokens[0]
 
 		useRequest := UseRequest{BucketName: bucketname, Conn: conn}
-
-		return handleUseRequest(useRequest)
+		return pushUseRequestToQ(useRequest)
 	default:
-		return error
+		log.Printf(illegalRequestTemplate, errNoSuchCommand)
+		return errNoSuchCommand
 	}
 
 }
