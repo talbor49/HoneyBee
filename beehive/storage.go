@@ -3,7 +3,7 @@ package beehive
 import (
 	"crypto/sha1"
 	"errors"
-	"fmt"
+	"log"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -33,11 +33,11 @@ func BucketExists(bucketName string) bool {
 }
 
 func WriteToHardDriveBucket(key string, value string, bucketName string) (string, error) {
-	fmt.Println(bucketName + "->" + key + ":" + value)
+	log.Printf("Setting data in bucket %s -> %s:%s", bucketName, key, value)
 
 	bucketPath := getBucketPath(bucketName)
 
-	fmt.Println("bucketPath: " + bucketPath)
+	log.Printf("Bucket path: %s", bucketPath)
 
 	f, err := os.OpenFile(bucketPath, os.O_APPEND|os.O_WRONLY, 0600)
 	if err != nil {
@@ -63,7 +63,7 @@ func ReadFromHardDriveBucket(key string, bucketName string) (string, error) {
 	keyHash := sha1.New()
 	hashedKey := string(keyHash.Sum([]byte(key)))
 
-	fmt.Println("bucketPath: " + bucketPath)
+	log.Printf("Bucket path: %s", bucketPath)
 
 	data, err := ioutil.ReadFile(bucketPath)
 	if err != nil {
@@ -90,14 +90,15 @@ func ReadFromHardDriveBucket(key string, bucketName string) (string, error) {
 
 func CreateHardDriveBucket(bucketName string) (string, error) {
 	bucketPath := getBucketPath(bucketName)
-	fmt.Println("Creating bucket: " + bucketName + " on path" + bucketPath)
+	log.Printf("Creating bucket: %s in path %s", bucketName, bucketPath)
 	_, err := os.Create(bucketPath)
 	if err != nil {
 		return "Error while creating bucket\n", err
 	}
-	return ("Successfully created bucket\n"), err
+	return "Successfully created bucket\n", err
 }
 
 func DeleteFromHardDriveBucket(object string, objectType string, bucketName string) (string, error) {
+	// TODO implement
 	return "", nil
 }

@@ -20,11 +20,11 @@ const (
 //QueueRequestsHandler will automatically pop actions from the action priority queue.
 //This method will always run as a goroutine.
 func QueueRequestsHandler() {
-	// fmt.Println("Entered queue worker")
-	// defer fmt.Println("Quit queue worker")
+	// log.Println("Entered queue worker")
+	// defer log.Println("Quit queue worker")
 	for {
 		if Queue.Len() == 0 {
-			// fmt.Println("queue is empty :(")
+			// log.Println("queue is empty :(")
 			time.Sleep(1 * time.Millisecond)
 		} else {
 			var action = PopFromRequestQueue()

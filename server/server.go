@@ -72,5 +72,5 @@ func handleConnection(conn DatabaseConnection) {
 		}
 
 	}
-	fmt.Println("Closed connection")
+	log.Println("Closed connection")
 }

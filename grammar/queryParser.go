@@ -2,8 +2,8 @@ package grammar
 
 import (
 	"errors"
-	"fmt"
 	"strings"
+	"log"
 )
 
 func ParseQuery(query string) (requestType string, parsedTokens []string, err error) {
@@ -40,8 +40,8 @@ func ParseQuery(query string) (requestType string, parsedTokens []string, err er
 		if validLength {
 			return requestType, tokens, nil
 		} else {
-			fmt.Println("Tokens recieved: ")
-			fmt.Print(tokens)
+			log.Println("Tokens recieved: ")
+			log.Println(tokens)
 			return "", nil, errors.New("AUTH request should look like 'AUTH username password'")
 		}
 	case "DELETE":

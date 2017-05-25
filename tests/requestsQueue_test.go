@@ -29,28 +29,28 @@ func TestSanity(t *testing.T) {
 
 	poppedSetRequest3 := server.PopFromRequestQueue().Request.(server.SetRequest)
 
-	// fmt.Println("First pop key: " + poppedSetRequest3.Key)
+	// log.Println("First pop key: " + poppedSetRequest3.Key)
 	if poppedSetRequest3.Key != setRequest3.Key || poppedSetRequest3.Value != setRequest3.Value {
 		t.Error("Error in priority queue - request did not pop in the correct order")
 	}
 
 	poppedSetRequest1 := server.PopFromRequestQueue().Request.(server.SetRequest)
 
-	// fmt.Println("Second pop key: " + poppedSetRequest1.Key)
+	// log.Println("Second pop key: " + poppedSetRequest1.Key)
 	if poppedSetRequest1.Key != setRequest1.Key || poppedSetRequest1.Value != setRequest1.Value {
 		t.Error("Error in priority queue - request did not pop in the correct order")
 	}
 
 	poppedSetRequest2 := server.PopFromRequestQueue().Request.(server.SetRequest)
 
-	// fmt.Println("Third pop key: " + poppedSetRequest2.Key)
+	// log.Println("Third pop key: " + poppedSetRequest2.Key)
 	if poppedSetRequest2.Key != setRequest2.Key || poppedSetRequest2.Value != setRequest2.Value {
 		t.Error("Error in priority queue - request did not pop in the correct order")
 	}
 
 	poppedSetRequest4 := server.PopFromRequestQueue().Request.(server.SetRequest)
 
-	// fmt.Println("Fourth pop key: " + poppedSetRequest4.Key)
+	// log.Println("Fourth pop key: " + poppedSetRequest4.Key)
 	if poppedSetRequest4.Key != setRequest4.Key || poppedSetRequest4.Value != setRequest4.Value {
 		t.Error("Error in priority queue - request did not pop in the correct order")
 	}
