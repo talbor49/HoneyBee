@@ -7,6 +7,10 @@ import (
 	"github.com/talbor49/HoneyBee/beehive"
 )
 
+const (
+	ERROR_NO_SUCH_BUCKET = "ERROR no bucket named %s exists."
+)
+
 // in the background, clean "cold" (unused) records from RAM
 
 // RULE OF THUMB - UPDATE LOGS WHATEVER YOU
@@ -104,8 +108,9 @@ func processUseRequest(req UseRequest) {
 		req.Conn.Bucket = req.BucketName
 		req.Conn.Write([]byte(OK + "\n"))
 	} else {
-		req.Conn.Write([]byte("ERROR bucket does not exist\n"))
-		fmt.Println("ERROR bucket " + req.BucketName + " does not exist")
+		errorMessage := fmt.Sprintf(ERROR_NO_SUCH_BUCKET, req.BucketName)
+		req.Conn.Write([]byte(errorMessage))
+		fmt.Println(errorMessage)
 	}
 }
 
