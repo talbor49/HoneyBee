@@ -3,6 +3,7 @@ package tests
 import (
 	"github.com/talbor49/HoneyBee/server"
 	"testing"
+	"github.com/talbor49/HoneyBee/grammar"
 )
 
 func TestNullValues(t *testing.T) {
@@ -18,10 +19,10 @@ func TestSanity(t *testing.T) {
 	setRequest4 := server.SetRequest{Key: "Marco", Value: "Polo", Conn: nil}
 
 	server.InitPriorityQueue()
-	server.PushRequestToActionQueue(setRequest1, "SET", 123)
-	server.PushRequestToActionQueue(setRequest2, "SET", 111)
-	server.PushRequestToActionQueue(setRequest3, "SET", 155)
-	server.PushRequestToActionQueue(setRequest4, "SET", 104)
+	server.PushRequestToActionQueue(setRequest1, grammar.SET_REQUEST, 123)
+	server.PushRequestToActionQueue(setRequest2, grammar.SET_REQUEST, 111)
+	server.PushRequestToActionQueue(setRequest3, grammar.SET_REQUEST, 155)
+	server.PushRequestToActionQueue(setRequest4, grammar.SET_REQUEST, 104)
 
 	if server.Queue.Len() == 0 {
 		t.Error("Queue was empty even though requests were pushed and not popped.")

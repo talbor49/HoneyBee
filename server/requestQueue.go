@@ -18,7 +18,7 @@ var Queue = make(PriorityQueue, 0)
 
 // An Action is something we manage in a priority queue.
 type Action struct {
-	RequestType string
+	RequestType byte
 	Request     interface{}
 	priority    int // The priority of the action in the queue.
 	// The index is needed by update and is maintained by the heap.Interface methods.
@@ -26,7 +26,7 @@ type Action struct {
 }
 
 // PushRequestToActionQueue pushes a database request to the actions priority queue.
-func PushRequestToActionQueue(request interface{}, requestType string, reqPriority int) {
+func PushRequestToActionQueue(request interface{}, requestType byte, reqPriority int) {
 	heap.Push(&Queue, &Action{
 		Request:     request,
 		priority:    reqPriority,
@@ -79,7 +79,7 @@ func (pq *PriorityQueue) Pop() interface{} {
 }
 
 // Update modifies the priority, request and requestType of an Action in the queue.
-func (pq *PriorityQueue) Update(action *Action, requestType string, request interface{}, priority int) {
+func (pq *PriorityQueue) Update(action *Action, requestType byte, request interface{}, priority int) {
 	action.RequestType = requestType
 	action.Request = request
 	action.priority = priority

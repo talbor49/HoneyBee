@@ -15,29 +15,30 @@ const (
 	illegalRequestTemplate = "Illegal request by client, %s"
 )
 
-// HandleQuery recieves a plain text string query, and hanles it.
+
+// HandleRequest recieves a plain text string query, and hanles it.
 // In most cases it adds it to the requests queue.
 // Whilst in AUTH requests it validates the credentials and returns an answer.
-func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
+func HandleRequest(query []byte, conn *DatabaseConnection) (returnCode string) {
 	log.Printf("Handling query: %s", query)
-	requestType, tokens, err := grammar.ParseQuery(query)
+	request, err := grammar.ParseRequest(query)
 
 	if err != nil {
 		return err.Error()
 	}
 
-	switch requestType {
-	case "AUTH":
+	switch request.Type {
+	case grammar.AUTH_REQUEST:
 		// AUTH {username} {password} {database_name}
 		log.Println("Client wants to authenticate.")
-		username := tokens[0]
-		password := tokens[1]
+		username := request.RequestData[0]
+		password := request.RequestData[1]
 		// bucketname := tokens[2]
 
 		authRequest := AuthRequest{Username: username, Password: password, Conn:conn}
 		log.Printf("User logged in as: %s", username)
 		return pushAuthRequestToQ(authRequest)
-	case "SET":
+	case grammar.SET_REQUEST:
 		// SET {key} {value} [ttl] [nooverride]
 		if conn.Bucket == "" {
 			log.Printf(illegalRequestTemplate, errNoBucket)
@@ -48,13 +49,13 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 			return errNotLoggedIn
 		}
 
-		key := tokens[0]
-		value := tokens[1]
+		key := request.RequestData[0]
+		value := request.RequestData[1]
 		log.Printf("Setting %s:%s", key, value)
 		setRequest := SetRequest{Key: key, Value: value, Conn: conn}
 		return pushSetRequestToQ(setRequest)
 
-	case "GET":
+	case grammar.GET_REQUEST:
 		// GET {key}
 		log.Println("Client wants to get key")
 		if conn.Bucket == "" {
@@ -65,12 +66,12 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 			log.Printf(illegalRequestTemplate, errNotLoggedIn)
 			return errNotLoggedIn
 		}
-		key := tokens[0]
+		key := request.RequestData[0]
 		log.Printf("Client asked for value of key: %s", key)
 		getRequest := GetRequest{Key: key, Conn: conn}
 		return pushGetRequestToQ(getRequest)
 
-	case "DELETE":
+	case grammar.DELETE_REQUEST:
 		// DELETE {key}
 		log.Println("Client wants to delete a bucket/key")
 		if conn.Bucket == "" {
@@ -83,25 +84,25 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 		}
 		// TODO implement
 		return success
-	case "CREATE":
+	case grammar.CREATE_REQUEST:
 		log.Println("Client wants to create a bucket")
 		if conn.Username == "" {
 			log.Printf(illegalRequestTemplate, errNotLoggedIn)
 			return errNotLoggedIn
 		}
 
-		bucketName := tokens[0]
+		bucketName := request.RequestData[0]
 
 		createRequest := CreateRequest{BucketName: bucketName, Conn: conn}
 
 		return pushCreateRequestToQ(createRequest)
-	case "USE":
+	case grammar.USE_REQUEST:
 		if conn.Username == "" {
 			log.Printf(illegalRequestTemplate, errNotLoggedIn)
 			return errNotLoggedIn
 		}
 
-		bucketname := tokens[0]
+		bucketname := request.RequestData[0]
 
 		useRequest := UseRequest{BucketName: bucketname, Conn: conn}
 		return pushUseRequestToQ(useRequest)

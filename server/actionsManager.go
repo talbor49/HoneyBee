@@ -6,6 +6,7 @@ import (
 
 	"github.com/talbor49/HoneyBee/beehive"
 	"log"
+	"github.com/talbor49/HoneyBee/grammar"
 )
 
 const (
@@ -30,17 +31,17 @@ func QueueRequestsHandler() {
 			var action = PopFromRequestQueue()
 			reqType := action.RequestType
 			switch reqType {
-			case "GET":
+			case grammar.GET_REQUEST:
 				processGetRequest(action.Request.(GetRequest))
-			case "SET":
+			case grammar.SET_REQUEST:
 				processSetRequest(action.Request.(SetRequest))
-			case "DELETE":
+			case grammar.DELETE_REQUEST:
 				processDeleteRequest(action.Request.(DeleteRequest))
-			case "USE":
+			case grammar.USE_REQUEST:
 				processUseRequest(action.Request.(UseRequest))
-			case "CREATE":
+			case grammar.CREATE_REQUEST:
 				processCreateRequest(action.Request.(CreateRequest))
-			case "AUTH":
+			case grammar.AUTH_REQUEST:
 				processAuthRequest(action.Request.(AuthRequest))
 			}
 			log.Printf("Popped request type: %s", action.RequestType)

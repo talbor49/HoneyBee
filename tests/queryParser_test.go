@@ -7,91 +7,94 @@ import (
 )
 
 func TestParseGetRequest(t *testing.T) {
-	requestType, parsedTokens, err := grammar.ParseQuery("GET foo")
+	var rawGetRequest []byte
+	rawGetRequest = append(rawGetRequest, grammar.GET_REQUEST)
+	rawGetRequest = append(rawGetRequest, grammar.REQUEST_STATUS)
+	rawGetRequest = append(rawGetRequest, []byte("foo")...)
+	rawGetRequest = append(rawGetRequest, 0)
+	request, err := grammar.ParseRequest(rawGetRequest)
 
 	if err != nil {
-		t.Error("Error parsing legit query")
+		t.Error("Error parsing legit GET query")
 	}
-	if requestType != "GET" {
+	if request.Type != grammar.GET_REQUEST {
 		t.Error("Query parsing did not recognize the right request type")
 	}
-	if parsedTokens[0] != "foo" {
+	if request.RequestData[0] != "foo" {
 		t.Error("Tokens parsed wrongly")
 	}
-
-	_, _, err = grammar.ParseQuery("GET")
-
-	if err == nil {
-		t.Error("Succeed in parsing an invalid query")
-	}
-
-	// requestType, parsedTokens, err = grammar.ParseQuery("GET ASMDQWE2309123 123====SAC A-S---- ;LQAWE,ZWD;LAZOW,E1PO;243KE0P2O1-3EOI90135I1123   12333333333123123\"\" --- ;")
-
 }
 
 func TestParseSetRequest(t *testing.T) {
-	requestType, parsedTokens, err := grammar.ParseQuery("SET foo bar")
+	var rawSetRequest []byte
+	rawSetRequest = append(rawSetRequest, grammar.SET_REQUEST)
+	rawSetRequest = append(rawSetRequest, grammar.REQUEST_STATUS)
+	rawSetRequest = append(rawSetRequest, []byte("foo")...)
+	rawSetRequest = append(rawSetRequest, 0)
+	rawSetRequest = append(rawSetRequest, []byte("bar")...)
+	request, err := grammar.ParseRequest(rawSetRequest)
 
 	if err != nil {
-		t.Error("Error parsing legit query")
+		t.Error("Error parsing legit SET query")
 	}
-	if requestType != "SET" {
+	if request.Type != grammar.SET_REQUEST {
 		t.Error("Query parsing did not recognize the right request type")
 	}
-	if len(parsedTokens) != 2 || parsedTokens[0] != "foo" || parsedTokens[1] != "bar" {
-		t.Error("Tokens parsed wrongly")
-	}
-
-	_, _, err = grammar.ParseQuery("SET")
-
-	if err == nil {
-		t.Error("Succeed in parsing an invalid query")
+	if len(request.RequestData) != 2 || request.RequestData[0] != "foo" || request.RequestData[1] != "bar" {
+		t.Error("Tokens parsed wrongly. got: ")
 	}
 }
 
 func TestParseAuthRequest(t *testing.T) {
-	requestType, parsedTokens, err := grammar.ParseQuery("AUTH username password")
+	var rawAuthRequest []byte
+	rawAuthRequest = append(rawAuthRequest, grammar.AUTH_REQUEST)
+	rawAuthRequest = append(rawAuthRequest, grammar.REQUEST_STATUS)
+	rawAuthRequest = append(rawAuthRequest, []byte("username")...)
+	rawAuthRequest = append(rawAuthRequest, 0)
+	rawAuthRequest = append(rawAuthRequest, []byte("password")...)
+	request, err := grammar.ParseRequest(rawAuthRequest)
 
 	if err != nil {
-		t.Error("Error parsing legit query")
+		t.Error("Error parsing legit AUTH query")
 	}
-	if requestType != "AUTH" {
+	if request.Type != grammar.AUTH_REQUEST {
 		t.Error("Query parsing did not recognize the right request type")
 	}
-	if len(parsedTokens) != 2 || parsedTokens[0] != "username" || parsedTokens[1] != "password" {
+	if len(request.RequestData) != 2 || request.RequestData[0] != "username" || request.RequestData[1] != "password" {
 		t.Error("Tokens parsed wrongly")
-	}
-
-	_, _, err = grammar.ParseQuery("AUTH ASMDQWE2309123 123====SAC A-S---- ;LQAWE,ZWD;LAZOW,E1PO;243KE0P2O1-3EOI90135I1123   12333333333123123\"\" --- ;")
-	if err == nil {
-		t.Error("Succeed in parsing an invalid query")
 	}
 }
 
 func TestParseDeleteRequest(t *testing.T) {
-	requestType, parsedTokens, err := grammar.ParseQuery("DELETE KEY foo")
+	var rawAuthRequest []byte
+	rawAuthRequest = append(rawAuthRequest, grammar.DELETE_REQUEST)
+	rawAuthRequest = append(rawAuthRequest, grammar.REQUEST_STATUS)
+	rawAuthRequest = append(rawAuthRequest, []byte("KEY")...)
+	rawAuthRequest = append(rawAuthRequest, 0)
+	rawAuthRequest = append(rawAuthRequest, []byte("foo")...)
+	request, err := grammar.ParseRequest(rawAuthRequest)
 
 	if err != nil {
-		t.Error("Error parsing legit query")
+		t.Error("Error parsing legit AUTH query")
 	}
-	if requestType != "DELETE" {
+	if request.Type != grammar.DELETE_REQUEST {
 		t.Error("Query parsing did not recognize the right request type")
 	}
-	if len(parsedTokens) != 2 || parsedTokens[0] != "KEY" || parsedTokens[1] != "foo" {
+	if len(request.RequestData) != 2 || request.RequestData[0] != "KEY" || request.RequestData[1] != "foo" {
 		t.Error("Tokens parsed wrongly")
 	}
 }
 
 func TestEmptyRequest(t *testing.T) {
-	requestType, _, err := grammar.ParseQuery("")
-	if err == nil || requestType != "" {
+	_, err := grammar.ParseRequest([]byte{99})
+	if err == nil {
 		t.Error("Succeed in parsing an invalid query")
 	}
 }
 
 func TestNonsenseRequest(t *testing.T) {
-	requestType, _, err := grammar.ParseQuery("1OP2M34IO1P2M3AWMDL;KA,SC;LZXS,C AOWMSXCOIAL MC0123945 I2103965I24-6")
-	if err == nil || requestType != "" {
+	_, err := grammar.ParseRequest([]byte("1OP2M34IO1P2M3AWMDL;KA,SC;LZXS,C AOWMSXCOIAL MC0123945 I2103965I24-6"))
+	if err == nil {
 		t.Error("Succeed in parsing an invalid query")
 	}
 }

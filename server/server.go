@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"strings"
 	"log"
+	"github.com/talbor49/HoneyBee/grammar"
 )
 
 const (
@@ -52,24 +52,19 @@ func handleConnection(conn DatabaseConnection) {
 	// authenticate and process further requests
 	defer conn.Close()
 
-	data := ""
+	var rawRequest []byte
 	buff := make([]byte, bufferLen)
 
-	for strings.TrimSpace(data) != "quit" {
+	for len(rawRequest) == 0 || rawRequest[0] != grammar.DELETE_REQUEST {
 		reqLen, err := conn.Read(buff)
 		if err != nil {
 			log.Printf("Error reading buffer. %s", err)
-			continue
+			return
 		}
-		data = string(buff[:reqLen])
-		for _, req := range strings.Split(data, "\n") {
-			if len(req) == 0 {
-				continue
-			}
-			returnMessage := HandleQuery(req, &conn)
-			conn.Write([]byte(returnMessage + "\n"))
-			log.Printf("Query handles with code %s", returnMessage)
-		}
+		rawRequest = buff[:reqLen]
+		returnMessage := HandleRequest(rawRequest, &conn)
+		conn.Write([]byte(returnMessage + "\n"))
+		log.Printf("Query handles with code %s", returnMessage)
 
 	}
 	log.Println("Closed connection")
