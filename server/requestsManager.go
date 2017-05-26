@@ -33,7 +33,12 @@ func pushUseRequestToQ(request UseRequest) string {
 	return OK
 }
 
-func pushCreateRequesToQ(request CreateRequest) string {
+func pushCreateRequestToQ(request CreateRequest) string {
 	PushRequestToActionQueue(request, "CREATE", 10)
+	return OK
+}
+
+func pushAuthRequestToQ(request AuthRequest) string {
+	PushRequestToActionQueue(request, "AUTH", 10)
 	return OK
 }

@@ -33,3 +33,9 @@ type CreateRequest struct {
 	Conn       *DatabaseConnection
 	BucketName string
 }
+
+type AuthRequest struct {
+	Conn *DatabaseConnection
+	Username string
+	Password string
+}

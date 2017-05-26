@@ -40,6 +40,8 @@ func QueueRequestsHandler() {
 				processUseRequest(action.Request.(UseRequest))
 			case "CREATE":
 				processCreateRequest(action.Request.(CreateRequest))
+			case "AUTH":
+				processAuthRequest(action.Request.(AuthRequest))
 			}
 			log.Printf("Popped request type: %s", action.RequestType)
 		}
@@ -124,4 +126,10 @@ func processCreateRequest(req CreateRequest) {
 	message, _ := beehive.CreateHardDriveBucket(req.BucketName)
 	req.Conn.Write([]byte(message))
 	log.Println(message)
+}
+
+func processAuthRequest(req AuthRequest) {
+	if credentialsValid(req.Username, req.Password) {
+		req.Conn.Username = req.Username
+	}
 }

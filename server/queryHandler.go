@@ -33,12 +33,10 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 		username := tokens[0]
 		password := tokens[1]
 		// bucketname := tokens[2]
-		if credentialsValid(username, password) {
-			conn.Username = username
-		}
 
+		authRequest := AuthRequest{Username: username, Password: password, Conn:conn}
 		log.Printf("User logged in as: %s", username)
-		return success
+		return pushAuthRequestToQ(authRequest)
 	case "SET":
 		// SET {key} {value} [ttl] [nooverride]
 		if conn.Bucket == "" {
@@ -96,7 +94,7 @@ func HandleQuery(query string, conn *DatabaseConnection) (returnCode string) {
 
 		createRequest := CreateRequest{BucketName: bucketName, Conn: conn}
 
-		return pushCreateRequesToQ(createRequest)
+		return pushCreateRequestToQ(createRequest)
 	case "USE":
 		if conn.Username == "" {
 			log.Printf(illegalRequestTemplate, errNotLoggedIn)
