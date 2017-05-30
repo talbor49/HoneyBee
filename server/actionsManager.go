@@ -1,16 +1,11 @@
 package server
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/talbor49/HoneyBee/beehive"
 	"log"
 	"github.com/talbor49/HoneyBee/grammar"
-)
-
-const (
-	ERROR_NO_SUCH_BUCKET = "ERROR no bucket named %s exists."
 )
 
 // in the background, clean "cold" (unused) records from RAM
@@ -50,8 +45,11 @@ func QueueRequestsHandler() {
 }
 
 func processDeleteRequest(req DeleteRequest) {
-	message, _ := beehive.DeleteFromHardDriveBucket(req.Object, req.ObjectType, req.Conn.Bucket)
-	req.Conn.Write([]byte(message))
+	response := grammar.Response{Type:grammar.DELETE_FINAL_ANSWER}
+	status, err := beehive.DeleteFromHardDriveBucket(req.Object, req.ObjectType, req.Conn.Bucket)
+	response.Status = status
+	response.Data = err.Error()
+	req.Conn.Write(grammar.GetBufferFromResponse(response))
 }
 
 func processGetRequest(req GetRequest) {
@@ -65,17 +63,27 @@ func processGetRequest(req GetRequest) {
 			return NOT FOUND
 		}
 	*/
+	response := grammar.Response{Type:grammar.GET_FINAL_ANSWER}
 	if req.Conn.Bucket == "" {
-		req.Conn.Write([]byte("ERROR client needs to authorize before sending requests"))
+		response.Status = grammar.RESP_STATUS_ERR_UNAUTHORIZED
+		req.Conn.Write(grammar.GetBufferFromResponse(response))
 		return
 	}
 	if !beehive.BucketExists(req.Conn.Bucket) {
-		req.Conn.Write([]byte(errBucketDoesNotExist))
+		response.Status = grammar.RESP_STATUS_ERR_NO_SUCH_BUCKET
+		req.Conn.Write(grammar.GetBufferFromResponse(response))
 		return
 	}
 
-	message, _ := beehive.ReadFromHardDriveBucket(req.Key, req.Conn.Bucket)
-	req.Conn.Write([]byte(message + "\n"))
+	message, err := beehive.ReadFromHardDriveBucket(req.Key, req.Conn.Bucket)
+	if err != nil {
+		response.Status = grammar.RESP_STATUS_ERR_KEY_NOT_FOUND
+		req.Conn.Write(grammar.GetBufferFromResponse(response))
+		return
+	}
+	response.Status = grammar.RESP_STATUS_SUCCESS
+	response.Data = message
+	req.Conn.Write(grammar.GetBufferFromResponse(response))
 }
 
 func processSetRequest(req SetRequest) {
@@ -91,46 +99,62 @@ func processSetRequest(req SetRequest) {
 		}
 	*/
 
+	response := grammar.Response{Type:grammar.SET_FINAL_ANSWER}
 	if req.Conn.Bucket == "" {
-		req.Conn.Write([]byte("ERROR client needs to authorize before sending requests\n"))
+		response.Status = grammar.RESP_STATUS_ERR_UNAUTHORIZED
+		req.Conn.Write(grammar.GetBufferFromResponse(response))
 		return
 	}
 	if !beehive.BucketExists(req.Conn.Bucket) {
-		req.Conn.Write([]byte(errBucketDoesNotExist))
+		response.Status = grammar.RESP_STATUS_ERR_NO_SUCH_BUCKET
+		req.Conn.Write(grammar.GetBufferFromResponse(response))
 		return
 	}
 
+	log.Printf("Setting %s->%s in bucket %s", req.Key, req.Value, req.Conn.Bucket)
 	// Write to hard disk
-	message, _ := beehive.WriteToHardDriveBucket(req.Key, req.Value, req.Conn.Bucket)
-	req.Conn.Write([]byte(message))
+	status, err := beehive.WriteToHardDriveBucket(req.Key, req.Value, req.Conn.Bucket)
+	response.Status = status
+	response.Data = err.Error()
+	req.Conn.Write(grammar.GetBufferFromResponse(response))
 }
 
 func processUseRequest(req UseRequest) {
+	response := grammar.Response{Type:grammar.USE_FINAL_ANSWER}
 	log.Printf("Checking if there is a database at path: %s", req.BucketName)
 	// If the bucket does not exist - create it.
 	if beehive.BucketExists(req.BucketName) {
 		req.Conn.Bucket = req.BucketName
-		req.Conn.Write([]byte(OK + "\n"))
+		response.Status = grammar.RESP_STATUS_SUCCESS
+		req.Conn.Write(grammar.GetBufferFromResponse(response))
 	} else {
-		errorMessage := fmt.Sprintf(ERROR_NO_SUCH_BUCKET, req.BucketName)
-		req.Conn.Write([]byte(errorMessage))
-		log.Println(errorMessage)
+		response.Status = grammar.RESP_STATUS_ERR_NO_SUCH_BUCKET
+		req.Conn.Write(grammar.GetBufferFromResponse(response))
+		log.Printf("Error - no bucket named %s found on disk.", req.BucketName)
 	}
 }
 
 func processCreateRequest(req CreateRequest) {
+	response := grammar.Response{Type:grammar.CREATE_FINAL_ANSWER}
 	if beehive.BucketExists(req.BucketName) {
-		req.Conn.Write([]byte(errBucketAlreadyExists + "\n"))
+		response.Status = grammar.RESP_STATUS_ERR_BUCKET_ALREADY_EXISTS
+		req.Conn.Write(grammar.GetBufferFromResponse(response))
 		return
 	}
 
-	message, _ := beehive.CreateHardDriveBucket(req.BucketName)
-	req.Conn.Write([]byte(message))
-	log.Println(message)
+	status, err := beehive.CreateHardDriveBucket(req.BucketName)
+	response.Status = status
+	response.Data = err.Error()
+	req.Conn.Write(grammar.GetBufferFromResponse(response))
 }
 
 func processAuthRequest(req AuthRequest) {
+	response := grammar.Response{Type:grammar.AUTHORIZE_FINAL_ANSWER}
 	if credentialsValid(req.Username, req.Password) {
 		req.Conn.Username = req.Username
+		response.Status = grammar.RESP_STATUS_SUCCESS
+	} else {
+		response.Status = grammar.RESP_STATUS_ERR_WRONG_CREDENTIALS
 	}
+	req.Conn.Write(grammar.GetBufferFromResponse(response))
 }

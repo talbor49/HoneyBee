@@ -8,10 +8,16 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"github.com/talbor49/HoneyBee/grammar"
 )
 
 const (
 	dataFolder = "data"
+)
+
+const (
+	KEY_WRITE_SUCCESS = iota
+	KEY_WRITE_FAILURE = iota
 )
 
 func getBucketPath(bucketName string) string {
@@ -32,7 +38,7 @@ func BucketExists(bucketName string) bool {
 	return true
 }
 
-func WriteToHardDriveBucket(key string, value string, bucketName string) (string, error) {
+func WriteToHardDriveBucket(key string, value string, bucketName string) (byte, error) {
 	log.Printf("Setting data in bucket %s -> %s:%s", bucketName, key, value)
 
 	bucketPath := getBucketPath(bucketName)
@@ -52,12 +58,12 @@ func WriteToHardDriveBucket(key string, value string, bucketName string) (string
 	value = strings.Replace(value, "\n", "\\n", -1)
 
 	if _, err = f.WriteString(hashedKey + ":" + value + "\n"); err != nil {
-		return "Error while trying to write key to bucket\n", err
+		return grammar.RESP_STATUS_ERR_COULD_NOT_WRITE_TO_DISK, err
 	}
-	return "Succesfully wrote key to bucket\n", nil
+	return grammar.RESP_STATUS_SUCCESS, nil
 }
 
-func ReadFromHardDriveBucket(key string, bucketName string) (string, error) {
+func ReadFromHardDriveBucket(key string, bucketName string) (result string, error error) {
 	bucketPath := getBucketPath(bucketName)
 
 	keyHash := sha1.New()
@@ -88,17 +94,17 @@ func ReadFromHardDriveBucket(key string, bucketName string) (string, error) {
 	return "", errors.New("Key not found")
 }
 
-func CreateHardDriveBucket(bucketName string) (string, error) {
+func CreateHardDriveBucket(bucketName string) (byte, error) {
 	bucketPath := getBucketPath(bucketName)
 	log.Printf("Creating bucket: %s in path %s", bucketName, bucketPath)
 	_, err := os.Create(bucketPath)
 	if err != nil {
-		return "Error while creating bucket\n", err
+		return grammar.RESP_STATUS_ERR_COULD_NOT_CREATE_BUCKET, err
 	}
-	return "Successfully created bucket\n", err
+	return grammar.RESP_STATUS_SUCCESS, err
 }
 
-func DeleteFromHardDriveBucket(object string, objectType string, bucketName string) (string, error) {
+func DeleteFromHardDriveBucket(object string, objectType string, bucketName string) (status byte, err error) {
 	// TODO implement
-	return "", nil
+	return grammar.RESP_STATUS_SUCCESS, nil
 }
