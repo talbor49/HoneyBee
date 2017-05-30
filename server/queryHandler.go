@@ -92,7 +92,7 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 		// TODO implement
 	case grammar.CREATE_REQUEST:
 		log.Println("Client wants to create a bucket")
-		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_DELETE_REQUEST,true, false)
+		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_CREATE_REQUEST,true, false)
 		if errorStatus != 0 {
 			request.Status = errorStatus
 			break
