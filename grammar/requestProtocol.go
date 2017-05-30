@@ -43,3 +43,14 @@ func validRequestStatus(reqStatus byte) bool {
 	return true
 }
 
+
+func BuildRawRequest(request Request) (buffer []byte) {
+	buffer = append(buffer, request.Type)
+	buffer = append(buffer, request.Status)
+	if len(buffer) > 2 {
+		for _, element := range request.RequestData {
+			buffer = append(buffer, element...)
+			buffer = append(buffer, 0)
+		}
+	}
+}
