@@ -15,100 +15,114 @@ const (
 	illegalRequestTemplate = "Illegal request by client, %s"
 )
 
+func checkRequirements(request grammar.Request, conn *DatabaseConnection, requestParamsLength int, requiresLogin bool, requiresBucket bool) (err byte){
+	if requiresBucket && conn.Bucket == "" {
+		return grammar.RESP_STATUS_ERR_NO_SUCH_BUCKET
+	}
+	if requiresLogin && conn.Username == "" {
+		return grammar.RESP_STATUS_ERR_UNAUTHORIZED
+	}
+	if len(request.RequestData) != requestParamsLength {
+		return grammar.RESP_STATUS_ERR_INVALID_AMOUNT_OF_PARAMS
+	}
+	return 0
+}
 
 // HandleRequest recieves a plain text string query, and hanles it.
 // In most cases it adds it to the requests queue.
 // Whilst in AUTH requests it validates the credentials and returns an answer.
-func HandleRequest(query []byte, conn *DatabaseConnection) (returnCode string) {
-	log.Printf("Handling query: %s", query)
+func HandleRequest(query []byte, conn *DatabaseConnection) {
+	log.Printf("Handling raw query: %s", query)
 	request, err := grammar.ParseRequest(query)
+	var response grammar.Response
 
 	if err != nil {
-		return err.Error()
+		response.Type = grammar.UNKNOWN_TYPE_RESPONSE
+		response.Status = grammar.RESP_STATUS_ERR_INVALID_QUERY
+		response.Data = err.Error()
+		conn.Write(grammar.GetBufferFromResponse(response))
 	}
 
 	switch request.Type {
 	case grammar.AUTH_REQUEST:
-		// AUTH {username} {password} {database_name}
-		log.Println("Client wants to authenticate.")
+		// AUTH {username} {password}
+		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_AUTH_REQUEST,false, false)
+		if err {
+			request.Status = errorStatus
+			break
+		}
 		username := request.RequestData[0]
 		password := request.RequestData[1]
 		// bucketname := tokens[2]
+		log.Printf("Client wants to authenticate.<username>:<password> %s:%s", username, password)
 
 		authRequest := AuthRequest{Username: username, Password: password, Conn:conn}
-		log.Printf("User logged in as: %s", username)
-		return pushAuthRequestToQ(authRequest)
+		response = processAuthRequest(authRequest)
 	case grammar.SET_REQUEST:
 		// SET {key} {value} [ttl] [nooverride]
-		if conn.Bucket == "" {
-			log.Printf(illegalRequestTemplate, errNoBucket)
-			return errNoBucket
-		}
-		if conn.Username == "" {
-			log.Printf(illegalRequestTemplate, errNoBucket)
-			return errNotLoggedIn
+		request.Type = grammar.SET_RESPONSE
+		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_SET_REQUEST,true, true)
+		if errorStatus != 0 {
+			request.Status = errorStatus
+			break
 		}
 
 		key := request.RequestData[0]
 		value := request.RequestData[1]
 		log.Printf("Setting %s:%s", key, value)
 		setRequest := SetRequest{Key: key, Value: value, Conn: conn}
-		return pushSetRequestToQ(setRequest)
+		response = processSetRequest(setRequest)
 
 	case grammar.GET_REQUEST:
 		// GET {key}
-		log.Println("Client wants to get key")
-		if conn.Bucket == "" {
-			log.Printf(illegalRequestTemplate, errNoBucket)
-			return errNoBucket
+		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_GET_REQUEST,true, true)
+		if errorStatus != 0 {
+			request.Status = errorStatus
+			break
 		}
-		if conn.Username == "" {
-			log.Printf(illegalRequestTemplate, errNotLoggedIn)
-			return errNotLoggedIn
-		}
+
 		key := request.RequestData[0]
-		log.Printf("Client asked for value of key: %s", key)
+		log.Printf("Client wants to get key '%s'", key)
 		getRequest := GetRequest{Key: key, Conn: conn}
-		return pushGetRequestToQ(getRequest)
+		response = processGetRequest(getRequest)
 
 	case grammar.DELETE_REQUEST:
 		// DELETE {key}
 		log.Println("Client wants to delete a bucket/key")
-		if conn.Bucket == "" {
-			log.Printf(illegalRequestTemplate, errNoBucket)
-			return errNoBucket
-		}
-		if conn.Username == "" {
-			log.Printf(illegalRequestTemplate, errNotLoggedIn)
-			return errNotLoggedIn
+		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_DELETE_REQUEST,true, true)
+		if errorStatus != 0 {
+			request.Status = errorStatus
+			break
 		}
 		// TODO implement
-		return success
 	case grammar.CREATE_REQUEST:
 		log.Println("Client wants to create a bucket")
-		if conn.Username == "" {
-			log.Printf(illegalRequestTemplate, errNotLoggedIn)
-			return errNotLoggedIn
+		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_DELETE_REQUEST,true, false)
+		if errorStatus != 0 {
+			request.Status = errorStatus
+			break
 		}
 
 		bucketName := request.RequestData[0]
-
 		createRequest := CreateRequest{BucketName: bucketName, Conn: conn}
 
-		return pushCreateRequestToQ(createRequest)
+		response = processCreateRequest(createRequest)
 	case grammar.USE_REQUEST:
-		if conn.Username == "" {
-			log.Printf(illegalRequestTemplate, errNotLoggedIn)
-			return errNotLoggedIn
+		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_USE_REQUEST,true, false)
+		if errorStatus != 0 {
+			request.Status = errorStatus
+			break
 		}
 
 		bucketname := request.RequestData[0]
 
 		useRequest := UseRequest{BucketName: bucketname, Conn: conn}
-		return pushUseRequestToQ(useRequest)
+		response = processUseRequest(useRequest)
 	default:
 		log.Printf(illegalRequestTemplate, errNoSuchCommand)
-		return errNoSuchCommand
+		response.Type = grammar.UNKNOWN_TYPE_RESPONSE
+		response.Status = grammar.RESP_STATUS_ERR_UNKNOWN_COMMAND
 	}
+	conn.Write(grammar.GetBufferFromResponse(response))
 
 }

@@ -14,6 +14,15 @@ const (
 	REQUEST_STATUS = 1
 )
 
+const (
+	LENGTH_OF_GET_REQUEST    = 1
+	LENGTH_OF_SET_REQUEST    = 2
+	LENGTH_OF_DELETE_REQUEST = 1
+	LENGTH_OF_AUTH_REQUEST   = 2
+	LENGTH_OF_CREATE_REQUEST = 1
+	LENGTH_OF_USE_REQUEST    = 1
+)
+
 type Request struct {
 	Type byte
 	Status byte
