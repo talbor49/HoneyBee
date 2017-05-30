@@ -6,12 +6,7 @@ import (
 )
 
 const (
-	success                = "OK"
 	errNoSuchCommand                  = "No such command"
-	errNoBucket            = "You are not connected to any bucket, use 'USE {BUCKET}'."
-	errNotLoggedIn         = "You are not logged in, use 'Auth {username} {password}'."
-	errBucketDoesNotExist  = "Bucket does not exist, use 'CREATE {BUCKET}'"
-	errBucketAlreadyExists = "Can not create bucket, a bucket with that name already exists"
 	illegalRequestTemplate = "Illegal request by client, %s"
 )
 
@@ -47,7 +42,7 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 	case grammar.AUTH_REQUEST:
 		// AUTH {username} {password}
 		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_AUTH_REQUEST,false, false)
-		if err {
+		if errorStatus != 0 {
 			request.Status = errorStatus
 			break
 		}

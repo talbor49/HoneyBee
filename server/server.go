@@ -34,8 +34,6 @@ func StartServer() {
 	// Close the listener socket when the application closes.
 	defer listener.Close()
 
-	go QueueRequestsHandler()
-
 	for {
 		conn, err := listener.Accept()
 		if err != nil {

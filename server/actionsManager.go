@@ -1,8 +1,6 @@
 package server
 
 import (
-	"time"
-
 	"github.com/talbor49/HoneyBee/beehive"
 	"log"
 	"github.com/talbor49/HoneyBee/grammar"
