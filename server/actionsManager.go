@@ -78,7 +78,9 @@ func processSetRequest(req SetRequest) (response grammar.Response){
 	// Write to hard disk
 	status, err := beehive.WriteToHardDriveBucket(req.Key, req.Value, req.Conn.Bucket)
 	response.Status = status
-	response.Data = err.Error()
+	if err != nil {
+		response.Data = err.Error()
+	}
 	return
 }
 

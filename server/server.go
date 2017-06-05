@@ -53,13 +53,16 @@ func handleConnection(conn DatabaseConnection) {
 	var rawRequest []byte
 	buff := make([]byte, bufferLen)
 
-	for len(rawRequest) == 0 || rawRequest[0] != grammar.QUIT_REQUEST {
+	for {
 		reqLen, err := conn.Read(buff)
 		if err != nil {
 			log.Printf("Error reading buffer. %s", err)
 			return
 		}
 		rawRequest = buff[:reqLen]
+		if len(rawRequest) > 0 && rawRequest[0] == grammar.QUIT_REQUEST {
+			break
+		}
 		go HandleRequest(rawRequest, &conn)
 	}
 	log.Println("Closed connection")

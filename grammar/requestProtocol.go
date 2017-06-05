@@ -12,6 +12,8 @@ const (
 
 const (
 	REQUEST_STATUS = 1
+	KEY = 2
+	BUCKET = 3
 )
 
 const (
@@ -43,14 +45,24 @@ func validRequestStatus(reqStatus byte) bool {
 	return true
 }
 
+func totalLength(st []string) int{
+	length := 0
+	for _, element := range st {
+		length += len(element)
+	}
+	return length
+}
 
 func BuildRawRequest(request Request) (buffer []byte) {
-	buffer = append(buffer, request.Type)
-	buffer = append(buffer, request.Status)
-	if len(buffer) > 2 {
+	buffer = make([]byte, 2 + totalLength(request.RequestData))
+	buffer[0] = request.Type
+	buffer[1] = request.Status
+	if len(request.RequestData) > 0 {
 		for _, element := range request.RequestData {
 			buffer = append(buffer, element...)
-			buffer = append(buffer, 0)
+			buffer = append(buffer, []byte{0}...)
 		}
 	}
+	buffer = append(buffer, []byte("\n")...)
+	return buffer
 }

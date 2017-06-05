@@ -4,17 +4,19 @@ import (
 	"errors"
 	"log"
 	"bytes"
+	"reflect"
 )
 
 func byte2dSliceToStringSlice(byteslice [][]byte) []string {
 	var stringslice []string
 	for _, bslice := range byteslice {
-		if len(bslice) > 0 {
+		if len(bslice) > 0 && !reflect.DeepEqual(bslice, []byte("\n")) && !reflect.DeepEqual(bslice, []byte{0}) {
 			stringslice = append(stringslice, string(bslice))
 		}
 	}
 	return stringslice
 }
+
 
 func ParseRequest(data []byte) (Request, error) {
 	if len(data) < 2 {

@@ -6,8 +6,7 @@ import (
 )
 
 const (
-	errNoSuchCommand                  = "No such command"
-	illegalRequestTemplate = "Illegal request by client, %s"
+	illegalRequestTemplate = "Illegal request by client, No such command '%d'"
 )
 
 func checkRequirements(request grammar.Request, conn *DatabaseConnection, requestParamsLength int, requiresLogin bool, requiresBucket bool) (err byte){
@@ -114,10 +113,12 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 		useRequest := UseRequest{BucketName: bucketname, Conn: conn}
 		response = processUseRequest(useRequest)
 	default:
-		log.Printf(illegalRequestTemplate, errNoSuchCommand)
+		log.Printf(illegalRequestTemplate, request.Type)
 		response.Type = grammar.UNKNOWN_TYPE_RESPONSE
 		response.Status = grammar.RESP_STATUS_ERR_UNKNOWN_COMMAND
 	}
+	log.Printf("Writing buffer to client: %s", grammar.GetBufferFromResponse(response))
 	conn.Write(grammar.GetBufferFromResponse(response))
+	log.Printf("Wrote buffer to client")
 
 }
