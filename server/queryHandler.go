@@ -10,11 +10,11 @@ const (
 )
 
 func checkRequirements(request grammar.Request, conn *DatabaseConnection, requestParamsLength int, requiresLogin bool, requiresBucket bool) (err byte){
-	if requiresBucket && conn.Bucket == "" {
-		return grammar.RESP_STATUS_ERR_NO_SUCH_BUCKET
-	}
 	if requiresLogin && conn.Username == "" {
 		return grammar.RESP_STATUS_ERR_UNAUTHORIZED
+	}
+	if requiresBucket && conn.Bucket == "" {
+		return grammar.RESP_STATUS_ERR_NO_SUCH_BUCKET
 	}
 	if len(request.RequestData) != requestParamsLength {
 		return grammar.RESP_STATUS_ERR_INVALID_AMOUNT_OF_PARAMS
@@ -27,10 +27,13 @@ func checkRequirements(request grammar.Request, conn *DatabaseConnection, reques
 // Whilst in AUTH requests it validates the credentials and returns an answer.
 func HandleRequest(query []byte, conn *DatabaseConnection) {
 	log.Printf("Handling raw query: %s", query)
+	log.Printf("Parsing request...")
 	request, err := grammar.ParseRequest(query)
+	log.Printf("Parsed request")
 	var response grammar.Response
 
 	if err != nil {
+		log.Printf("Error in request parsing! %s", err.Error())
 		response.Type = grammar.UNKNOWN_TYPE_RESPONSE
 		response.Status = grammar.RESP_STATUS_ERR_INVALID_QUERY
 		response.Data = err.Error()
@@ -42,11 +45,13 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 		// AUTH {username} {password}
 		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_AUTH_REQUEST,false, false)
 		if errorStatus != 0 {
-			request.Status = errorStatus
+			log.Printf("Error in AUTH request! %d", errorStatus)
+			response.Status = errorStatus
 			break
 		}
 		username := request.RequestData[0]
 		password := request.RequestData[1]
+		log.Println("Logging in...")
 		// bucketname := tokens[2]
 		log.Printf("Client wants to authenticate.<username>:<password> %s:%s", username, password)
 
@@ -57,7 +62,8 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 		request.Type = grammar.SET_RESPONSE
 		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_SET_REQUEST,true, true)
 		if errorStatus != 0 {
-			request.Status = errorStatus
+			log.Printf("Error in SET request! %d", errorStatus)
+			response.Status = errorStatus
 			break
 		}
 
@@ -71,7 +77,8 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 		// GET {key}
 		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_GET_REQUEST,true, true)
 		if errorStatus != 0 {
-			request.Status = errorStatus
+			log.Printf("Error in GET request! %d", errorStatus)
+			response.Status = errorStatus
 			break
 		}
 
@@ -85,7 +92,8 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 		log.Println("Client wants to delete a bucket/key")
 		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_DELETE_REQUEST,true, true)
 		if errorStatus != 0 {
-			request.Status = errorStatus
+			log.Printf("Error in DELETE request! %d", errorStatus)
+			response.Status = errorStatus
 			break
 		}
 		// TODO implement
@@ -93,7 +101,8 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 		log.Println("Client wants to create a bucket")
 		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_CREATE_REQUEST,true, false)
 		if errorStatus != 0 {
-			request.Status = errorStatus
+			log.Printf("Error in CREATE request! %d", errorStatus)
+			response.Status = errorStatus
 			break
 		}
 
@@ -104,7 +113,8 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 	case grammar.USE_REQUEST:
 		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_USE_REQUEST,true, false)
 		if errorStatus != 0 {
-			request.Status = errorStatus
+			log.Printf("Error in USE request! %d", errorStatus)
+			response.Status = errorStatus
 			break
 		}
 
@@ -117,8 +127,10 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 		response.Type = grammar.UNKNOWN_TYPE_RESPONSE
 		response.Status = grammar.RESP_STATUS_ERR_UNKNOWN_COMMAND
 	}
-	log.Printf("Writing buffer to client: %s", grammar.GetBufferFromResponse(response))
+	if response.Status != 0 {
+		log.Printf("Error in request. status: %d", response.Status)
+	}
 	conn.Write(grammar.GetBufferFromResponse(response))
-	log.Printf("Wrote buffer to client")
+	log.Printf("Wrote buffer: %s to client", grammar.GetBufferFromResponse(response))
 
 }
