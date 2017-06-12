@@ -97,7 +97,7 @@ func ReadFromHardDriveBucket(key string, bucketName string) (result string, erro
 func CreateHardDriveBucket(bucketName string) (byte, error) {
 	bucketPath := getBucketPath(bucketName)
 	log.Printf("Creating bucket: %s in path %s", bucketName, bucketPath)
-	_, err := os.Create(bucketPath)
+	_, err := os.OpenFile(bucketPath, os.O_CREATE, 0600)
 	if err != nil {
 		return grammar.RESP_STATUS_ERR_COULD_NOT_CREATE_BUCKET, err
 	}
