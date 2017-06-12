@@ -51,7 +51,6 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 		}
 		username := request.RequestData[0]
 		password := request.RequestData[1]
-		log.Println("Logging in...")
 		// bucketname := tokens[2]
 		log.Printf("Client wants to authenticate.<username>:<password> %s:%s", username, password)
 
@@ -97,19 +96,33 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 			break
 		}
 		// TODO implement
-	case grammar.CREATE_REQUEST:
+	case grammar.CREATE_BUCKET_REQUEST:
 		log.Println("Client wants to create a bucket")
-		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_CREATE_REQUEST,true, false)
+		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_CREATE_BUCKET_REQUEST,true, false)
 		if errorStatus != 0 {
-			log.Printf("Error in CREATE request! %d", errorStatus)
+			log.Printf("Error in CREATE bucket request! %d", errorStatus)
 			response.Status = errorStatus
 			break
 		}
 
 		bucketName := request.RequestData[0]
-		createRequest := CreateRequest{BucketName: bucketName, Conn: conn}
+		createBucketRequest := CreateBucketRequest{BucketName: bucketName, Conn: conn}
 
-		response = processCreateRequest(createRequest)
+		response = processCreateBucketRequest(createBucketRequest)
+	case grammar.CREATE_USER_REQUEST:
+		log.Printf("Client wants to create a user")
+		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_CREATE_USER_REQUEST,false, false)
+		if errorStatus != 0 {
+			log.Printf("Error in CREATE user request! %d", errorStatus)
+			response.Status = errorStatus
+			break
+		}
+
+		username := request.RequestData[0]
+		password := request.RequestData[1]
+		createUserRequest := CreateUserRequest{Username: username, Password:password, Conn: conn}
+
+		response = processCreateUserRequest(createUserRequest)
 	case grammar.USE_REQUEST:
 		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_USE_REQUEST,true, false)
 		if errorStatus != 0 {

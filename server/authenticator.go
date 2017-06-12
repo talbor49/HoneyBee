@@ -1,23 +1,31 @@
 package server
 
 import (
-	"strings"
-	"log"
+	"github.com/talbor49/HoneyBee/beehive"
+	"crypto/sha1"
+	"io"
 )
 
+const SALTS_BUCKET = "salts_bucket"
+const USERS_BUCKET = "users_bucket"
+
+
 func credentialsValid(username string, password string) bool {
-	return true
+	salt, err := beehive.ReadFromHardDriveBucket(username, SALTS_BUCKET)
+	if err != nil { return false }
+	saltedPassword := password + salt
+
+	hashedSaltedPassword := hash(saltedPassword)
+
+	realHashedSaltedPassword, _ := beehive.ReadFromHardDriveBucket(username, USERS_BUCKET)
+
+	if err != nil { return false }
+
+	return hashedSaltedPassword == realHashedSaltedPassword
 }
 
-//HandleAuthentication checks if credentials are valid - if they are, return the username, else, return an empty string.
-func HandleAuthentication(authQuery string) string {
-	// Returns username if authentication is successful, else return empty string
-	// Authentication is:            USERNAME PASSWORD DATABASE
-	log.Printf("authQuery: %s", authQuery)
-	usernameEndIndex := strings.Index(authQuery, " ")
-	if usernameEndIndex != -1 {
-		return authQuery[:strings.Index(authQuery, " ")]
-	} else {
-		return ""
-	}
+func hash(str string) string {
+	h := sha1.New()
+	io.WriteString(h, str)
+	return string(h.Sum(nil))
 }

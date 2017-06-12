@@ -4,6 +4,7 @@ import (
 	"github.com/talbor49/HoneyBee/beehive"
 	"log"
 	"github.com/talbor49/HoneyBee/grammar"
+	"math/rand"
 )
 
 // in the background, clean "cold" (unused) records from RAM
@@ -36,18 +37,14 @@ func processGetRequest(req GetRequest) (response grammar.Response) {
 		response.Status = grammar.RESP_STATUS_ERR_UNAUTHORIZED
 		return
 	}
-	if !beehive.BucketExists(req.Conn.Bucket) {
-		response.Status = grammar.RESP_STATUS_ERR_NO_SUCH_BUCKET
-		return
-	}
 
-	message, err := beehive.ReadFromHardDriveBucket(req.Key, req.Conn.Bucket)
+	data, err := beehive.ReadFromHardDriveBucket(req.Key, req.Conn.Bucket)
 	if err != nil {
 		response.Status = grammar.RESP_STATUS_ERR_KEY_NOT_FOUND
 		return
 	}
 	response.Status = grammar.RESP_STATUS_SUCCESS
-	response.Data = message
+	response.Data = data
 	return
 }
 
@@ -67,10 +64,6 @@ func processSetRequest(req SetRequest) (response grammar.Response){
 	response.Type = grammar.SET_RESPONSE
 	if req.Conn.Bucket == "" {
 		response.Status = grammar.RESP_STATUS_ERR_UNAUTHORIZED
-		return
-	}
-	if !beehive.BucketExists(req.Conn.Bucket) {
-		response.Status = grammar.RESP_STATUS_ERR_NO_SUCH_BUCKET
 		return
 	}
 
@@ -98,8 +91,9 @@ func processUseRequest(req UseRequest) (response grammar.Response){
 	return
 }
 
-func processCreateRequest(req CreateRequest) (response grammar.Response){
+func processCreateBucketRequest(req CreateBucketRequest) (response grammar.Response){
 	response.Type= grammar.CREATE_RESPONSE
+
 	if beehive.BucketExists(req.BucketName) {
 		response.Status = grammar.RESP_STATUS_ERR_BUCKET_ALREADY_EXISTS
 		return
@@ -107,7 +101,32 @@ func processCreateRequest(req CreateRequest) (response grammar.Response){
 
 	status, err := beehive.CreateHardDriveBucket(req.BucketName)
 	response.Status = status
-	response.Data = err.Error()
+	if err != nil {
+		response.Data = err.Error()
+	}
+	return
+}
+
+func processCreateUserRequest(req CreateUserRequest) (response grammar.Response){
+	response.Type= grammar.CREATE_RESPONSE
+
+	saltBuffer := make([]byte, 64)
+	rand.Read(saltBuffer)
+	salt := string(saltBuffer)
+	saltedPassword := req.Password + string(salt)
+	hashedAndSaltedPassword := hash(saltedPassword)
+
+	status, err := beehive.WriteToHardDriveBucket(req.Username, string(salt), SALTS_BUCKET)
+	if err != nil {
+		response.Status = status
+		response.Data = err.Error()
+		return
+	}
+	status, err = beehive.WriteToHardDriveBucket(req.Username, hashedAndSaltedPassword, USERS_BUCKET)
+	response.Status = status
+	if err != nil {
+		response.Data = err.Error()
+	}
 	return
 }
 

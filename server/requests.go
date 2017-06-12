@@ -28,10 +28,16 @@ type UseRequest struct {
 	BucketName string
 }
 
-//CreateRequest creates a database file(bucket) in the db folder
-type CreateRequest struct {
+//CreateBucketRequest creates a database file(bucket) in the db folder
+type CreateBucketRequest struct {
 	Conn       *DatabaseConnection
 	BucketName string
+}
+
+type CreateUserRequest struct {
+	Conn       *DatabaseConnection
+	Username string
+	Password string
 }
 
 type AuthRequest struct {

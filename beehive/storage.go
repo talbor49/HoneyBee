@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"github.com/talbor49/HoneyBee/grammar"
+	"fmt"
 )
 
 const (
@@ -45,19 +46,16 @@ func WriteToHardDriveBucket(key string, value string, bucketName string) (byte, 
 
 	log.Printf("Bucket path: %s", bucketPath)
 
-	f, err := os.OpenFile(bucketPath, os.O_APPEND|os.O_WRONLY, 0600)
-	if err != nil {
-		panic(err)
+	if !BucketExists(bucketName) {
+		return grammar.RESP_STATUS_ERR_NO_SUCH_BUCKET, errors.New(fmt.Sprintf("Bucket in path '%s' does not exist", bucketPath))
 	}
-
-	defer f.Close()
 
 	keyHash := sha1.New()
 	hashedKey := string(keyHash.Sum([]byte(key)))
 
 	value = strings.Replace(value, "\n", "\\n", -1)
 
-	if _, err = f.WriteString(hashedKey + ":" + value + "\n"); err != nil {
+	if err := ioutil.WriteFile(bucketPath, []byte(hashedKey + ":" + value + "\n"), 0644); err != nil {
 		return grammar.RESP_STATUS_ERR_COULD_NOT_WRITE_TO_DISK, err
 	}
 	return grammar.RESP_STATUS_SUCCESS, nil
@@ -70,6 +68,10 @@ func ReadFromHardDriveBucket(key string, bucketName string) (result string, erro
 	hashedKey := string(keyHash.Sum([]byte(key)))
 
 	log.Printf("Bucket path: %s", bucketPath)
+
+	if !BucketExists(bucketName) {
+		return "", errors.New(fmt.Sprintf("Bucket in path '%s' does not exist", bucketPath))
+	}
 
 	data, err := ioutil.ReadFile(bucketPath)
 	if err != nil {
