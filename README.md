@@ -17,6 +17,8 @@ docker-compose up
 go test github.com/talbor49/HoneyBee/tests
 ```
 
+## How to use?
+Clients at https://github.com/talbor49/HoneyBeeClient
 
 ## Things to remember while developing:
 1. Compress data - save pointers to data, etc.
