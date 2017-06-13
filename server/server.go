@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	port      = "5000"
+	port      = os.Getenv("PORT")
 	ip        = "0.0.0.0"
 	bufferLen = 1024
 )
