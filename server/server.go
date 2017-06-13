@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	port      = "8080"
+	port      = "5000"
 	ip        = "0.0.0.0"
 	bufferLen = 1024
 )
