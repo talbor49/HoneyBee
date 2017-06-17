@@ -1,25 +1,28 @@
 package server
 
 import (
-	"github.com/talbor49/HoneyBee/beehive"
 	"crypto/sha1"
+	"github.com/talbor49/HoneyBee/beehive"
 	"io"
 )
 
 const SALTS_BUCKET = "salts_bucket"
 const USERS_BUCKET = "users_bucket"
 
-
 func credentialsValid(username string, password string) bool {
 	salt, err := beehive.ReadFromHardDriveBucket(username, SALTS_BUCKET)
-	if err != nil { return false }
+	if err != nil {
+		return false
+	}
 	saltedPassword := password + salt
 
 	hashedSaltedPassword := hash(saltedPassword)
 
 	realHashedSaltedPassword, _ := beehive.ReadFromHardDriveBucket(username, USERS_BUCKET)
 
-	if err != nil { return false }
+	if err != nil {
+		return false
+	}
 
 	return hashedSaltedPassword == realHashedSaltedPassword
 }

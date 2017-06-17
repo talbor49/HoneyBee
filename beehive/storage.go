@@ -3,13 +3,13 @@ package beehive
 import (
 	"crypto/sha1"
 	"errors"
-	"log"
+	"fmt"
+	"github.com/talbor49/HoneyBee/grammar"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
-	"github.com/talbor49/HoneyBee/grammar"
-	"fmt"
 )
 
 const (
@@ -55,7 +55,7 @@ func WriteToHardDriveBucket(key string, value string, bucketName string) (byte, 
 
 	value = strings.Replace(value, "\n", "\\n", -1)
 
-	if err := ioutil.WriteFile(bucketPath, []byte(hashedKey + ":" + value + "\n"), 0644); err != nil {
+	if err := ioutil.WriteFile(bucketPath, []byte(hashedKey+":"+value+"\n"), 0644); err != nil {
 		return grammar.RESP_STATUS_ERR_COULD_NOT_WRITE_TO_DISK, err
 	}
 	return grammar.RESP_STATUS_SUCCESS, nil

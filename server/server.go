@@ -2,10 +2,10 @@ package server
 
 import (
 	"fmt"
+	"github.com/talbor49/HoneyBee/grammar"
+	"log"
 	"net"
 	"os"
-	"log"
-	"github.com/talbor49/HoneyBee/grammar"
 )
 
 const (

@@ -2,8 +2,8 @@ package server
 
 import (
 	"github.com/talbor49/HoneyBee/beehive"
-	"log"
 	"github.com/talbor49/HoneyBee/grammar"
+	"log"
 	"math/rand"
 )
 
@@ -11,7 +11,6 @@ import (
 
 // RULE OF THUMB - UPDATE LOGS WHATEVER YOU
 // current decision - don't compress keys, only compress values
-
 
 func processDeleteRequest(req DeleteRequest) (response grammar.Response) {
 	response.Type = grammar.DELETE_RESPONSE
@@ -48,7 +47,7 @@ func processGetRequest(req GetRequest) (response grammar.Response) {
 	return
 }
 
-func processSetRequest(req SetRequest) (response grammar.Response){
+func processSetRequest(req SetRequest) (response grammar.Response) {
 	/*
 		FIRST:
 			// DECIDE IF TO KEEP A POINTER TO THE VALUE IN MEMORY OR THE VALUE OF ITSELF
@@ -77,7 +76,7 @@ func processSetRequest(req SetRequest) (response grammar.Response){
 	return
 }
 
-func processUseRequest(req UseRequest) (response grammar.Response){
+func processUseRequest(req UseRequest) (response grammar.Response) {
 	response.Type = grammar.USE_RESPONSE
 	log.Printf("Checking if there is a database at path: %s", req.BucketName)
 	// If the bucket does not exist - create it.
@@ -91,8 +90,8 @@ func processUseRequest(req UseRequest) (response grammar.Response){
 	return
 }
 
-func processCreateBucketRequest(req CreateBucketRequest) (response grammar.Response){
-	response.Type= grammar.CREATE_RESPONSE
+func processCreateBucketRequest(req CreateBucketRequest) (response grammar.Response) {
+	response.Type = grammar.CREATE_RESPONSE
 
 	if beehive.BucketExists(req.BucketName) {
 		response.Status = grammar.RESP_STATUS_ERR_BUCKET_ALREADY_EXISTS
@@ -107,8 +106,8 @@ func processCreateBucketRequest(req CreateBucketRequest) (response grammar.Respo
 	return
 }
 
-func processCreateUserRequest(req CreateUserRequest) (response grammar.Response){
-	response.Type= grammar.CREATE_RESPONSE
+func processCreateUserRequest(req CreateUserRequest) (response grammar.Response) {
+	response.Type = grammar.CREATE_RESPONSE
 
 	saltBuffer := make([]byte, 64)
 	rand.Read(saltBuffer)

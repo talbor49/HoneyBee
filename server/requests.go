@@ -35,13 +35,13 @@ type CreateBucketRequest struct {
 }
 
 type CreateUserRequest struct {
-	Conn       *DatabaseConnection
+	Conn     *DatabaseConnection
 	Username string
 	Password string
 }
 
 type AuthRequest struct {
-	Conn *DatabaseConnection
+	Conn     *DatabaseConnection
 	Username string
 	Password string
 }

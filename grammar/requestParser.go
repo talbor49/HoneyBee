@@ -1,8 +1,8 @@
 package grammar
 
 import (
-	"errors"
 	"bytes"
+	"errors"
 	"reflect"
 )
 
@@ -15,7 +15,6 @@ func byte2dSliceToStringSlice(byteslice [][]byte) []string {
 	}
 	return stringslice
 }
-
 
 func ParseRequest(data []byte) (Request, error) {
 	if len(data) < 2 {

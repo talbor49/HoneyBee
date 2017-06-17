@@ -9,7 +9,7 @@ const (
 	illegalRequestTemplate = "Illegal request by client, No such command '%d'"
 )
 
-func checkRequirements(request grammar.Request, conn *DatabaseConnection, requestParamsLength int, requiresLogin bool, requiresBucket bool) (err byte){
+func checkRequirements(request grammar.Request, conn *DatabaseConnection, requestParamsLength int, requiresLogin bool, requiresBucket bool) (err byte) {
 	if requiresLogin && conn.Username == "" {
 		return grammar.RESP_STATUS_ERR_UNAUTHORIZED
 	}
@@ -43,7 +43,7 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 	switch request.Type {
 	case grammar.AUTH_REQUEST:
 		// AUTH {username} {password}
-		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_AUTH_REQUEST,false, false)
+		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_AUTH_REQUEST, false, false)
 		if errorStatus != 0 {
 			log.Printf("Error in AUTH request! %d", errorStatus)
 			response.Status = errorStatus
@@ -54,12 +54,12 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 		// bucketname := tokens[2]
 		log.Printf("Client wants to authenticate.<username>:<password> %s:%s", username, password)
 
-		authRequest := AuthRequest{Username: username, Password: password, Conn:conn}
+		authRequest := AuthRequest{Username: username, Password: password, Conn: conn}
 		response = processAuthRequest(authRequest)
 	case grammar.SET_REQUEST:
 		// SET {key} {value} [ttl] [nooverride]
 		request.Type = grammar.SET_RESPONSE
-		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_SET_REQUEST,true, true)
+		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_SET_REQUEST, true, true)
 		if errorStatus != 0 {
 			log.Printf("Error in SET request! %d", errorStatus)
 			response.Status = errorStatus
@@ -74,7 +74,7 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 
 	case grammar.GET_REQUEST:
 		// GET {key}
-		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_GET_REQUEST,true, true)
+		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_GET_REQUEST, true, true)
 		if errorStatus != 0 {
 			log.Printf("Error in GET request! %d", errorStatus)
 			response.Status = errorStatus
@@ -89,7 +89,7 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 	case grammar.DELETE_REQUEST:
 		// DELETE {key}
 		log.Println("Client wants to delete a bucket/key")
-		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_DELETE_REQUEST,true, true)
+		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_DELETE_REQUEST, true, true)
 		if errorStatus != 0 {
 			log.Printf("Error in DELETE request! %d", errorStatus)
 			response.Status = errorStatus
@@ -98,7 +98,7 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 		// TODO implement
 	case grammar.CREATE_BUCKET_REQUEST:
 		log.Println("Client wants to create a bucket")
-		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_CREATE_BUCKET_REQUEST,true, false)
+		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_CREATE_BUCKET_REQUEST, true, false)
 		if errorStatus != 0 {
 			log.Printf("Error in CREATE bucket request! %d", errorStatus)
 			response.Status = errorStatus
@@ -111,7 +111,7 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 		response = processCreateBucketRequest(createBucketRequest)
 	case grammar.CREATE_USER_REQUEST:
 		log.Printf("Client wants to create a user")
-		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_CREATE_USER_REQUEST,false, false)
+		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_CREATE_USER_REQUEST, false, false)
 		if errorStatus != 0 {
 			log.Printf("Error in CREATE user request! %d", errorStatus)
 			response.Status = errorStatus
@@ -120,11 +120,11 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 
 		username := request.RequestData[0]
 		password := request.RequestData[1]
-		createUserRequest := CreateUserRequest{Username: username, Password:password, Conn: conn}
+		createUserRequest := CreateUserRequest{Username: username, Password: password, Conn: conn}
 
 		response = processCreateUserRequest(createUserRequest)
 	case grammar.USE_REQUEST:
-		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_USE_REQUEST,true, false)
+		errorStatus := checkRequirements(request, conn, grammar.LENGTH_OF_USE_REQUEST, true, false)
 		if errorStatus != 0 {
 			log.Printf("Error in USE request! %d", errorStatus)
 			response.Status = errorStatus
