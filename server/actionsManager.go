@@ -109,6 +109,15 @@ func processCreateBucketRequest(req CreateBucketRequest) (response grammar.Respo
 func processCreateUserRequest(req CreateUserRequest) (response grammar.Response) {
 	response.Type = grammar.CREATE_RESPONSE
 
+
+
+	if !beehive.BucketExists(SALTS_BUCKET) {
+		beehive.CreateHardDriveBucket(SALTS_BUCKET)
+	}
+	if !beehive.BucketExists(USERS_BUCKET) {
+		beehive.CreateHardDriveBucket(USERS_BUCKET)
+	}
+
 	saltBuffer := make([]byte, 64)
 	rand.Read(saltBuffer)
 	salt := string(saltBuffer)
