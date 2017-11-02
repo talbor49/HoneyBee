@@ -132,6 +132,10 @@ func HandleRequest(query []byte, conn *DatabaseConnection) {
 		}
 
 		bucketname := request.RequestData[0]
+		if bucketname == SALTS_BUCKET || bucketname == USERS_BUCKET {
+			response.Status = grammar.RESP_STATUS_ERR_UNAUTHORIZED
+			break
+		}
 
 		useRequest := UseRequest{BucketName: bucketname, Conn: conn}
 		response = processUseRequest(useRequest)
