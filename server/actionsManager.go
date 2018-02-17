@@ -124,6 +124,11 @@ func processCreateUserRequest(req CreateUserRequest) (response grammar.Response)
 	saltedPassword := req.Password + string(salt)
 	hashedAndSaltedPassword := hash(saltedPassword)
 
+	if beehive.KeyExists(req.Username, USERS_BUCKET) {
+		response.Status = grammar.RESP_STATUS_ERR_USERNAME_EXISTS
+		return
+	}
+
 	status, err := beehive.WriteToHardDriveBucket(req.Username, string(salt), SALTS_BUCKET)
 	if err != nil {
 		response.Status = status

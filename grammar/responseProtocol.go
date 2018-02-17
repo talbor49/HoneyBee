@@ -27,6 +27,7 @@ const (
 	RESP_STATUS_ERR_INVALID_QUERY            = 8
 	RESP_STATUS_ERR_INVALID_AMOUNT_OF_PARAMS = 9
 	RESP_STATUS_ERR_UNKNOWN_COMMAND          = 10
+	RESP_STATUS_ERR_USERNAME_EXISTS 		 = 11
 )
 
 type Response struct {
@@ -103,6 +104,8 @@ func ResponseToString(response Response) (str string) {
 			str += "RESP_STATUS_ERR_INVALID_QUERY            "
 		case RESP_STATUS_ERR_INVALID_AMOUNT_OF_PARAMS :
 			str += "RESP_STATUS_ERR_INVALID_AMOUNT_OF_PARAMS "
+		case RESP_STATUS_ERR_USERNAME_EXISTS:
+			str += "RESP_STATUS_ERR_USERNAME_EXISTS  "
 	}
 	str += "data: " + response.Data
 	return

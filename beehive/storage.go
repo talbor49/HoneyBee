@@ -82,6 +82,7 @@ func ReadFromHardDriveBucket(key string, bucketName string) (result string, erro
 
 	for i := len(pairs) - 1; i >= 0; i-- {
 		pair := pairs[i]
+		pair = strings.Replace(pair, "\\n", "\n", -1)
 		colonIndex := strings.Index(pair, ":")
 		if colonIndex <= 0 {
 			continue
@@ -109,4 +110,9 @@ func CreateHardDriveBucket(bucketName string) (byte, error) {
 func DeleteFromHardDriveBucket(object string, objectType string, bucketName string) (status byte, err error) {
 	// TODO implement
 	return grammar.RESP_STATUS_SUCCESS, nil
+}
+
+func KeyExists(key string, bucketName string) bool {
+	_, err := ReadFromHardDriveBucket(key, bucketName)
+	return err == nil
 }
