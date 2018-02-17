@@ -64,3 +64,46 @@ func GetResponseFromBuffer(buffer []byte) (response Response) {
 	}
 	return
 }
+
+func ResponseToString(response Response) (str string) {
+	switch response.Type {
+		case UNKNOWN_TYPE_RESPONSE:
+			str += "UNKNOWN_TYPE_RESPONSE "
+		case GET_RESPONSE         :
+			str += "GET_RESPONSE          "
+		case SET_RESPONSE         :
+			str += "SET_RESPONSE          "
+		case DELETE_RESPONSE      :
+			str += "DELETE_RESPONSE       "
+		case AUTHORIZE_RESPONSE   :
+			str += "AUTHORIZE_RESPONSE    "
+		case CREATE_RESPONSE      :
+			str += "CREATE_RESPONSE       "
+		case USE_RESPONSE         :
+			str += "USE_RESPONSE          "
+	}
+	switch response.Status {
+		case RESP_STATUS_SUCCESS                      :
+			str += "RESP_STATUS_SUCCESS                      "
+		case RESP_STATUS_ERR_UNAUTHORIZED             :
+			str += "RESP_STATUS_ERR_UNAUTHORIZED             "
+		case RESP_STATUS_ERR_NO_SUCH_BUCKET           :
+			str += "RESP_STATUS_ERR_NO_SUCH_BUCKET           "
+		case RESP_STATUS_ERR_KEY_NOT_FOUND            :
+			str += "RESP_STATUS_ERR_KEY_NOT_FOUND            "
+		case RESP_STATUS_ERR_COULD_NOT_WRITE_TO_DISK  :
+			str += "RESP_STATUS_ERR_COULD_NOT_WRITE_TO_DISK  "
+		case RESP_STATUS_ERR_BUCKET_ALREADY_EXISTS    :
+			str += "RESP_STATUS_ERR_BUCKET_ALREADY_EXISTS    "
+		case RESP_STATUS_ERR_COULD_NOT_CREATE_BUCKET  :
+			str += "RESP_STATUS_ERR_COULD_NOT_CREATE_BUCKET  "
+		case RESP_STATUS_ERR_WRONG_CREDENTIALS        :
+			str += "RESP_STATUS_ERR_WRONG_CREDENTIALS        "
+		case RESP_STATUS_ERR_INVALID_QUERY            :
+			str += "RESP_STATUS_ERR_INVALID_QUERY            "
+		case RESP_STATUS_ERR_INVALID_AMOUNT_OF_PARAMS :
+			str += "RESP_STATUS_ERR_INVALID_AMOUNT_OF_PARAMS "
+	}
+	str += "data: " + response.Data
+	return
+}
